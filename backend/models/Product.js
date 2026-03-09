@@ -27,6 +27,7 @@ const productSchema = new mongoose.Schema({
   subcategory: String,
   type: { type: String, default: 'product' },
   image: String,
+  imageUrl: String,
   images: [String],
   description: String,
   rating: { type: Number, default: 4.5 },

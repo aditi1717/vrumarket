@@ -122,7 +122,7 @@ const ProductCard = ({ product, showVault = true, compact = false }) => {
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <div className="bg-secondary text-white flex items-center gap-0.5 px-1 py-0.5 rounded text-[7px] md:text-[9px] font-bold shrink-0">
+                        <div className="bg-emerald-600 text-white flex items-center gap-0.5 px-1 py-0.5 rounded text-[7px] md:text-[9px] font-bold shrink-0">
                             <Star size={9} fill="currentColor" />
                             <span>{product.rating}</span>
                         </div>
