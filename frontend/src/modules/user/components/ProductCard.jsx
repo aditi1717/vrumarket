@@ -1,11 +1,10 @@
-import React from 'react';
-import { useProducts } from '../../../hooks/useProducts';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../../context/AuthContext';
 import useCartStore from '../../../store/useCartStore';
 import useUserStore from '../../../store/useUserStore';
 import { useNavigate } from 'react-router-dom';
-import { Star, Heart } from 'lucide-react';
+import { Star, Heart, ChevronDown, ShoppingCart } from 'lucide-react';
 import logo from '../../../assets/logo.webp';
 import toast from 'react-hot-toast';
 
@@ -13,11 +12,9 @@ const calculatePer100g = (price, quantity, unit, weightStr) => {
     let q = parseFloat(quantity);
     let u = unit ? unit.toLowerCase().trim() : '';
 
-    // Known valid units for manual check
     const validUnits = ['g', 'gm', 'gms', 'kg', 'kgs'];
     const hasValidStructuredData = q && validUnits.includes(u);
 
-    // Fallback parsing from weight string if structured data is effectively missing/invalid
     if (!hasValidStructuredData && weightStr) {
         const match = String(weightStr).match(/(\d+(\.\d+)?)\s*([a-zA-Z]+)/);
         if (match) {
@@ -38,55 +35,100 @@ const calculatePer100g = (price, quantity, unit, weightStr) => {
     return null;
 };
 
+const getVariantLabel = (variant) => {
+    if (variant?.weight) return variant.weight;
+
+    const quantity = variant?.quantity ?? '';
+    const unit = variant?.unit ?? '';
+    return `${quantity}${unit}`.trim();
+};
+
 const ProductCard = ({ product, showVault = true, compact = false }) => {
     const navigate = useNavigate();
     const { user } = useAuth();
     const { addToCart, getCart } = useCartStore();
-    // const { addToCart, toggleWishlist, isInWishlist } = useShop(); // Removed
-    const toggleWishlist = useUserStore(state => state.toggleWishlist);
-    const addToSaved = useUserStore(state => state.addToSaved);
-    const wishlistMap = useUserStore(state => state.wishlist);
-    const savedMap = useUserStore(state => state.saveForLater);
+    const toggleWishlist = useUserStore((state) => state.toggleWishlist);
+    const wishlistMap = useUserStore((state) => state.wishlist);
     const userWishlist = user ? (wishlistMap[user.id] || []) : [];
-    const userSaved = user ? (savedMap[user.id] || []) : [];
 
-    // Handle products with variants (Flipkart style)
-    const hasVariants = product.variants && product.variants.length > 0;
+    const hasVariants = Array.isArray(product.variants) && product.variants.length > 0;
+    const hasMultipleVariants = (product.variants?.length || 0) > 1;
+    const [selectedVariantId, setSelectedVariantId] = useState('');
+    const [isVariantMenuOpen, setIsVariantMenuOpen] = useState(false);
+    const variantMenuRef = useRef(null);
 
-    // Helper to check wishlist
-    const itemId = hasVariants ? product.variants[0].id : product.id;
-    const isWishlisted = userWishlist.includes(itemId);
-    const isSaved = userSaved.some(item => String(item.packId) === String(itemId));
-
-    // Get lowest price for "From ₹X" look
-    const displayPrice = hasVariants
-        ? Math.min(...product.variants.map(v => v.price))
-        : product.price;
-
-    const displayMrp = hasVariants
-        ? product.variants.find(v => v.price === displayPrice)?.mrp || product.variants[0].mrp
-        : product.mrp;
-
-    const displayDiscount = hasVariants
-        ? product.variants.find(v => v.price === displayPrice)?.discount || product.variants[0].discount
-        : product.discount;
-
-    const per100gPrice = (() => {
-        if (hasVariants) {
-            const variant = product.variants.find(v => v.price === displayPrice) || product.variants[0];
-            return calculatePer100g(displayPrice, variant.quantity, variant.unit, variant.weight);
+    useEffect(() => {
+        if (!hasVariants) {
+            setSelectedVariantId('');
+            setIsVariantMenuOpen(false);
+            return;
         }
-        return calculatePer100g(displayPrice, product.quantity, product.unit, product.weight);
-    })();
+
+        setSelectedVariantId(String(product.variants[0].id));
+        setIsVariantMenuOpen(false);
+    }, [hasVariants, product]);
+
+    useEffect(() => {
+        if (!isVariantMenuOpen) return undefined;
+
+        const handlePointerDown = (event) => {
+            if (variantMenuRef.current && !variantMenuRef.current.contains(event.target)) {
+                setIsVariantMenuOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handlePointerDown);
+        document.addEventListener('touchstart', handlePointerDown);
+
+        return () => {
+            document.removeEventListener('mousedown', handlePointerDown);
+            document.removeEventListener('touchstart', handlePointerDown);
+        };
+    }, [isVariantMenuOpen]);
+
+    const defaultVariant = hasVariants
+        ? product.variants.reduce((lowest, variant) => (
+            Number(variant.price || 0) < Number(lowest.price || 0) ? variant : lowest
+        ), product.variants[0])
+        : null;
+    const selectedVariant = hasVariants
+        ? product.variants.find((variant) => String(variant.id) === String(selectedVariantId)) || null
+        : null;
+    const activeVariant = selectedVariant || defaultVariant;
+    const displayVariant = activeVariant || defaultVariant;
+
+    const itemId = hasVariants ? (displayVariant?.id || product.variants[0].id) : product.id;
+    const isWishlisted = userWishlist.includes(itemId);
+
+    const displayPrice = hasVariants
+        ? Number(displayVariant?.price || 0)
+        : Number(product.price || 0);
+    const displayMrp = hasVariants
+        ? Number(displayVariant?.mrp || displayVariant?.price || 0)
+        : Number(product.mrp || product.price || 0);
+    const per100gPrice = hasVariants
+        ? calculatePer100g(
+            displayPrice,
+            displayVariant?.quantity,
+            displayVariant?.unit,
+            displayVariant?.weight
+        )
+        : calculatePer100g(displayPrice, product.quantity, product.unit, product.weight);
+
+    const activeStock = hasVariants
+        ? Number(activeVariant?.stock || 0)
+        : Number(product.stock?.quantity || 0);
+    const selectionRequired = hasMultipleVariants && !selectedVariant;
+    const cartItems = getCart(user?.id);
+    const isInCart = !selectionRequired && cartItems.some((item) => String(item.packId) === String(itemId));
 
     return (
         <motion.div
             layout
             onClick={() => navigate(`/product/${product.slug || product.id}`)}
-            className="group/product relative bg-white border border-accent/50 rounded-[0.7rem] md:rounded-[1rem] overflow-hidden flex flex-col shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer h-full"
+            className="group/product relative bg-white border border-accent/50 rounded-2xl md:rounded-3xl overflow-hidden flex flex-col shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer h-full"
         >
-            {/* Image Header - Shorter Aspect Ratio to reduce overall card height */}
-            <div className={`relative ${compact ? 'aspect-[16/7]' : 'aspect-[16/11]'} w-full overflow-hidden bg-background ${compact ? 'p-1 md:p-2' : 'p-2 md:p-4'} text-center`}>
+            <div className={`relative ${compact ? 'aspect-[16/9]' : 'aspect-[4/3]'} w-full overflow-hidden bg-gradient-to-b from-background to-accent/20 flex items-center justify-center`}>
                 {product.tag && (
                     <div className="absolute top-2 left-0 z-10 md:top-3">
                         <span className="bg-secondary text-white text-[7px] md:text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 md:px-3 md:py-1 rounded-r-lg shadow-sm">
@@ -94,6 +136,7 @@ const ProductCard = ({ product, showVault = true, compact = false }) => {
                         </span>
                     </div>
                 )}
+
                 {displayMrp > displayPrice && (
                     <div className="absolute top-2 right-2 z-10 md:top-3 md:right-3">
                         <span className="bg-accent text-textPrimary text-[7px] md:text-[9px] font-bold px-1 py-0.5 rounded shadow-sm border border-secondary/30">
@@ -107,12 +150,11 @@ const ProductCard = ({ product, showVault = true, compact = false }) => {
                     alt={product.name}
                     loading="lazy"
                     decoding="async"
-                    className="w-full h-full object-contain transition-transform duration-500 group-hover/product:scale-110"
+                    className="w-full h-full object-contain drop-shadow-sm transition-transform duration-500 group-hover/product:scale-110"
                 />
             </div>
 
-            {/* Content Section - Compact Height */}
-            <div className={`${compact ? 'p-1.5 md:p-2.5' : 'p-2 md:p-4'} flex-1 flex flex-col`}>
+            <div className={`${compact ? 'p-2 md:p-3' : 'p-3 md:px-4 md:pt-4'} pb-0 flex-1 flex flex-col`}>
                 <div className="flex items-center justify-between mb-1 md:mb-2">
                     <div className="flex items-center gap-1">
                         <img src={logo} alt="FarmLyf" className="h-2.5 md:h-3.5 w-auto object-contain" />
@@ -130,26 +172,78 @@ const ProductCard = ({ product, showVault = true, compact = false }) => {
                             onClick={(e) => {
                                 e.stopPropagation();
                                 if (!user) {
-                                    return navigate('/login');
+                                    navigate('/login');
+                                    return;
                                 }
                                 toggleWishlist(user.id, itemId);
                             }}
                             className="text-gray-300 hover:text-red-500 transition-colors p-0.5 active:scale-95"
                         >
-                            <Heart size={16} fill={isWishlisted ? "#ef4444" : "none"} className={isWishlisted ? "text-red-500" : ""} />
+                            <Heart size={16} fill={isWishlisted ? '#ef4444' : 'none'} className={isWishlisted ? 'text-red-500' : ''} />
                         </button>
                     </div>
                 </div>
 
-                <h3 className="text-[9px] md:text-[12px] font-bold text-textPrimary leading-tight mb-0.5 line-clamp-2 h-7 md:h-8">
+                <h3 className="text-[9px] md:text-[12px] font-bold text-textPrimary leading-tight mb-1 md:mb-2 line-clamp-2">
                     {product.name}
                 </h3>
 
-                <div className={`mt-auto ${compact ? 'space-y-1' : 'space-y-2 md:space-y-4'}`}>
+                <div className={`mt-auto ${compact ? 'space-y-0.5' : 'space-y-0.5 md:space-y-1'}`}>
+                    {hasMultipleVariants && (
+                        <div
+                            ref={variantMenuRef}
+                            className="relative"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <button
+                                type="button"
+                                onClick={() => setIsVariantMenuOpen((open) => !open)}
+                                className="w-full rounded-md border border-gray-300 bg-white px-2 py-2 text-[9px] md:text-[11px] font-medium text-textPrimary outline-none transition-colors hover:border-primary focus:border-primary flex items-center justify-between gap-2"
+                                aria-haspopup="listbox"
+                                aria-expanded={isVariantMenuOpen}
+                            >
+                                <span>{selectedVariant ? getVariantLabel(selectedVariant) : 'Choose an option'}</span>
+                                <ChevronDown size={14} className={`transition-transform ${isVariantMenuOpen ? 'rotate-180' : ''}`} />
+                            </button>
+
+                            {isVariantMenuOpen && (
+                                <div
+                                    className="absolute left-0 right-0 top-full z-20 mt-1 max-h-48 overflow-y-auto overflow-x-hidden rounded-md border border-gray-200 bg-white shadow-lg"
+                                    role="listbox"
+                                    aria-label={`Weight options for ${product.name}`}
+                                >
+                                    {product.variants.map((variant) => {
+                                        const isSelected = String(variant.id) === String(selectedVariantId);
+
+                                        return (
+                                            <button
+                                                key={variant.id}
+                                                type="button"
+                                                onClick={() => {
+                                                    setSelectedVariantId(String(variant.id));
+                                                    setIsVariantMenuOpen(false);
+                                                }}
+                                                className={`flex w-full items-center justify-between px-3 py-2 text-left text-[9px] md:text-[11px] transition-colors ${isSelected
+                                                    ? 'bg-primary/10 text-primary font-semibold'
+                                                    : 'text-textPrimary hover:bg-gray-50'
+                                                    }`}
+                                            >
+                                                <span>{getVariantLabel(variant)}</span>
+                                                <span className="text-[8px] md:text-[10px] font-medium text-gray-500">₹{variant.price}</span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
                     <div className="flex items-center gap-1 md:gap-2 flex-wrap">
                         <div className="flex items-baseline gap-1">
-                            <span className="text-[10px] md:text-sm font-black text-secondary tracking-tight">₹{displayPrice}</span>
-                            <span className="text-[9px] md:text-[11px] text-gray-600 line-through">₹{displayMrp}</span>
+                            <span className="text-[10px] md:text-sm font-black text-black tracking-tight">₹{displayPrice}</span>
+                            {displayMrp > displayPrice && (
+                                <span className="text-[9px] md:text-[11px] text-gray-600 line-through">₹{displayMrp}</span>
+                            )}
                             {per100gPrice && (
                                 <span className="text-[8px] md:text-[10px] text-gray-500 font-medium whitespace-nowrap">
                                     (₹{per100gPrice}/100g)
@@ -158,20 +252,20 @@ const ProductCard = ({ product, showVault = true, compact = false }) => {
                         </div>
                     </div>
 
-                    <div className="w-full">
+                    <div className={`w-auto overflow-hidden ${compact ? '-mx-2 md:-mx-3' : '-mx-3 md:-mx-4'}`}>
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
-                                const itemId = hasVariants ? product.variants[0].id : product.id;
-                                const stockAvailable = hasVariants ? (product.variants[0].stock || 0) : (product.stock?.quantity || 0);
 
-                                if (stockAvailable <= 0) {
-                                    toast.error("Item is currently out of stock");
+                                if (selectionRequired) {
+                                    toast.error('Please choose a weight option');
                                     return;
                                 }
 
-                                const cartItems = getCart(user?.id);
-                                const isInCart = cartItems.some(item => String(item.packId) === String(itemId));
+                                if (activeStock <= 0) {
+                                    toast.error('Item is currently out of stock');
+                                    return;
+                                }
 
                                 if (isInCart) {
                                     navigate('/cart');
@@ -180,19 +274,31 @@ const ProductCard = ({ product, showVault = true, compact = false }) => {
 
                                 addToCart(user?.id, itemId, 1);
                             }}
-                            disabled={(hasVariants ? (product.variants[0].stock || 0) : (product.stock?.quantity || 0)) <= 0}
-                            className={`w-full py-2 md:py-2.5 rounded-md md:rounded-lg text-[8px] md:text-[10px] font-bold uppercase tracking-wider transition-all active:scale-95 flex items-center justify-center shadow-md
-                                ${(hasVariants ? (product.variants[0].stock || 0) : (product.stock?.quantity || 0)) <= 0
-                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
-                                    : getCart(user?.id).some(item => String(item.packId) === String(hasVariants ? product.variants[0].id : product.id))
-                                        ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                                        : 'bg-primary hover:bg-secondary text-white'}`}
+                            disabled={!selectionRequired && activeStock <= 0}
+                            className={`group/btn w-full py-3 md:py-3.5 rounded-t-none rounded-b-2xl md:rounded-b-3xl text-[8px] md:text-[10px] font-bold uppercase tracking-[0.18em] active:scale-[0.99] flex items-center justify-center border-t translate-y-full group-hover/product:translate-y-0 transition-[transform,background-color] duration-300 ease-out shadow-inner ${!selectionRequired && activeStock <= 0
+                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200'
+                                : isInCart
+                                    ? 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-500'
+                                    : 'bg-primary hover:bg-secondary text-white border-primary/80'
+                                }`}
                         >
-                            {(hasVariants ? (product.variants[0].stock || 0) : (product.stock?.quantity || 0)) <= 0
+                            {!selectionRequired && activeStock <= 0
                                 ? 'Out of Stock'
-                                : getCart(user?.id).some(item => String(item.packId) === String(hasVariants ? product.variants[0].id : product.id))
-                                    ? 'Go to Cart'
-                                    : 'Add to Cart'}
+                                : selectionRequired
+                                    ? 'Choose Option'
+                                    : isInCart
+                                        ? 'Go to Cart'
+                                        : (
+                                            <div className="grid place-items-center">
+                                                <span className="col-start-1 row-start-1 transition-all duration-300 ease-out transform group-hover/btn:-translate-y-4 group-hover/btn:opacity-0 group-hover/btn:scale-75">
+                                                    Add to Cart
+                                                </span>
+                                                <ShoppingCart
+                                                    strokeWidth={2.5}
+                                                    className="col-start-1 row-start-1 w-4 h-4 md:w-5 md:h-5 transition-all duration-300 ease-out transform translate-y-4 opacity-0 scale-50 group-hover/btn:translate-y-0 group-hover/btn:opacity-100 group-hover/btn:scale-100"
+                                                />
+                                            </div>
+                                        )}
                         </button>
                     </div>
                 </div>
