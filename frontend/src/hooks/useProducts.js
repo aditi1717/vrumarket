@@ -141,11 +141,31 @@ export const useDeleteProduct = () => {
             }
             return res.json();
         },
-        onSuccess: () => {
+        onMutate: async (id) => {
+            await queryClient.cancelQueries({ queryKey: ['products'] });
+
+            const previousProducts = queryClient.getQueryData(['products']);
+
+            queryClient.setQueryData(['products'], (currentProducts = []) =>
+                currentProducts.filter((product) => String(product._id || product.id) !== String(id))
+            );
+
+            return { previousProducts };
+        },
+        onSuccess: (_, id) => {
+            queryClient.removeQueries({ queryKey: ['product', id] });
             queryClient.invalidateQueries({ queryKey: ['products'] });
             toast.success('Product deleted successfully!');
         },
-        onError: (err) => toast.error(err.message)
+        onError: (err, _id, context) => {
+            if (context?.previousProducts) {
+                queryClient.setQueryData(['products'], context.previousProducts);
+            }
+            toast.error(err.message);
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ['products'] });
+        }
     });
 };
 

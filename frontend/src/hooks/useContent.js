@@ -218,6 +218,29 @@ const createCRUDHooks = (queryKey, path) => {
     };
 };
 
+const syncFeaturedSectionCaches = (queryClient, section) => {
+    if (!section) return;
+
+    queryClient.setQueryData(['featured-sections'], (currentSections = []) => {
+        const nextSections = Array.isArray(currentSections) ? [...currentSections] : [];
+        const sectionIndex = nextSections.findIndex((item) =>
+            String(item?._id || item?.id) === String(section?._id || section?.id) ||
+            String(item?.name) === String(section?.name)
+        );
+
+        if (sectionIndex >= 0) {
+            nextSections[sectionIndex] = { ...nextSections[sectionIndex], ...section };
+            return nextSections;
+        }
+
+        return [...nextSections, section];
+    });
+
+    if (section.name) {
+        queryClient.setQueryData(['featured-sections', section.name], section);
+    }
+};
+
 const announcements = createCRUDHooks('announcements', 'announcements');
 export const useAnnouncements = announcements.useData;
 export const useAddAnnouncement = announcements.useAdd;
@@ -226,8 +249,86 @@ export const useDeleteAnnouncement = announcements.useDelete;
 
 const featuredSections = createCRUDHooks('featured-sections', 'featured-sections');
 export const useFeaturedSections = featuredSections.useData;
-export const useAddFeaturedSection = featuredSections.useAdd;
-export const useUpdateFeaturedSection = featuredSections.useUpdate;
+
+export const useAddFeaturedSection = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (data) => {
+            const res = await fetch(`${API_URL}/featured-sections`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+                body: JSON.stringify(data),
+                credentials: 'include'
+            });
+            if (!res.ok) throw new Error('Failed to add featured-sections');
+            return res.json();
+        },
+        onSuccess: (section) => {
+            syncFeaturedSectionCaches(queryClient, section);
+            queryClient.invalidateQueries({ queryKey: ['featured-sections'] });
+            if (section?.name) {
+                queryClient.invalidateQueries({ queryKey: ['featured-sections', section.name] });
+            }
+            toast.success('featured-sections added!');
+        },
+        onError: (err) => toast.error(err.message)
+    });
+};
+
+export const useUpdateFeaturedSection = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ id, data }) => {
+            const res = await fetch(`${API_URL}/featured-sections/${id || ''}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+                body: JSON.stringify(data),
+                credentials: 'include'
+            });
+            if (!res.ok) throw new Error('Failed to update featured-sections');
+            return res.json();
+        },
+        onMutate: async (variables) => {
+            const { data, optimisticData } = variables;
+            const sectionName = optimisticData?.name || data?.name;
+
+            await queryClient.cancelQueries({ queryKey: ['featured-sections'] });
+            if (sectionName) {
+                await queryClient.cancelQueries({ queryKey: ['featured-sections', sectionName] });
+            }
+
+            const previousSections = queryClient.getQueryData(['featured-sections']);
+            const previousSectionByName = sectionName
+                ? queryClient.getQueryData(['featured-sections', sectionName])
+                : null;
+
+            if (optimisticData) {
+                syncFeaturedSectionCaches(queryClient, optimisticData);
+            }
+
+            return { previousSections, previousSectionByName, sectionName };
+        },
+        onSuccess: (section, variables) => {
+            const sectionName = section?.name || variables?.data?.name || variables?.optimisticData?.name;
+            syncFeaturedSectionCaches(queryClient, section);
+            queryClient.invalidateQueries({ queryKey: ['featured-sections'] });
+            if (sectionName) {
+                queryClient.invalidateQueries({ queryKey: ['featured-sections', sectionName] });
+            }
+            toast.success('featured-sections updated!');
+        },
+        onError: (err, _variables, context) => {
+            if (context?.previousSections) {
+                queryClient.setQueryData(['featured-sections'], context.previousSections);
+            }
+            if (context?.sectionName) {
+                queryClient.setQueryData(['featured-sections', context.sectionName], context.previousSectionByName);
+            }
+            toast.error(err.message);
+        }
+    });
+};
+
 export const useDeleteFeaturedSection = featuredSections.useDelete;
 
 export const useFeaturedSectionByName = (name) => {

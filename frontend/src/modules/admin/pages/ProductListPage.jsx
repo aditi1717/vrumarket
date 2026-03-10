@@ -94,7 +94,7 @@ const ProductListPage = () => {
         try {
             await updateSectionMutation.mutateAsync({
                 id: dbSectionId,
-                data: { products: selectedProducts }
+                data: { name: targetSectionId, products: selectedProducts }
             });
             navigate(-1);
         } catch (error) {

@@ -95,7 +95,12 @@ const HomepageSectionPage = () => {
         // Optimistic UI is handled by local state.
         updateSectionMutation.mutate({
             id: sectionData._id,
-            data: { products: updatedProductIds }
+            data: { name: sectionId, products: updatedProductIds },
+            optimisticData: {
+                ...sectionData,
+                name: sectionId,
+                products: newGlobalList
+            }
         });
     };
 
@@ -121,7 +126,12 @@ const HomepageSectionPage = () => {
         try {
             await updateSectionMutation.mutateAsync({
                 id: sectionData._id,
-                data: { products: updatedProductIds }
+                data: { name: sectionId, products: updatedProductIds },
+                optimisticData: {
+                    ...sectionData,
+                    name: sectionId,
+                    products: products.filter(p => (p._id || p.id) !== productId)
+                }
             });
         } catch (error) { }
     };
@@ -150,7 +160,12 @@ const HomepageSectionPage = () => {
                 ];
                 await updateSectionMutation.mutateAsync({
                     id: sectionData._id,
-                    data: { products: updatedProductIds }
+                    data: { name: sectionId, products: updatedProductIds },
+                    optimisticData: {
+                        ...sectionData,
+                        name: sectionId,
+                        products: [...products, allProducts.find((p) => (p._id || p.id) === productId)].filter(Boolean)
+                    }
                 });
             }
             setSearchTerm('');
@@ -194,7 +209,12 @@ const HomepageSectionPage = () => {
             } else {
                 await updateSectionMutation.mutateAsync({
                     id: sectionData._id,
-                    data: payload
+                    data: { name: sectionId, ...payload },
+                    optimisticData: {
+                        ...sectionData,
+                        name: sectionId,
+                        ...payload
+                    }
                 });
             }
             await refetchSection();
