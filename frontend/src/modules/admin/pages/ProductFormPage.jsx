@@ -61,7 +61,7 @@ const SuggestionInput = ({ value, onChange, placeholder, options }) => {
                 className="w-full bg-white border border-gray-300 rounded-xl p-3 text-xs font-bold text-black outline-none focus:border-black transition-all"
             />
             {show && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl max-h-48 overflow-y-auto z-50">
+                <div className="absolute top-full left-0 min-w-[200px] md:min-w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-xl max-h-48 overflow-y-auto z-50 whitespace-nowrap">
                     {options.filter(o => o.toLowerCase().includes(value.toLowerCase())).map((opt, i) => (
                         <div
                             key={i}
@@ -731,7 +731,7 @@ const ProductFormPage = () => {
                             {Array.isArray(formData.specifications) && formData.specifications.map((spec, idx) => (
                                 <div key={idx} className="flex gap-2 items-center">
                                     <div className="w-1/3 relative z-20">
-                                        <SuggestionInput 
+                                        <SuggestionInput
                                             value={spec.label}
                                             onChange={(e) => updateItem('specifications', idx, 'label', e.target.value)}
                                             placeholder="Label"
