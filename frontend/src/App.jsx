@@ -37,13 +37,11 @@ import ReplacementDetailPage from './modules/admin/pages/ReplacementDetailPage';
 import CouponListPage from './modules/admin/pages/CouponListPage';
 import CouponFormPage from './modules/admin/pages/CouponFormPage';
 import SettingsPage from './modules/admin/pages/SettingsPage';
-import InfluencerReferralPage from './modules/admin/pages/InfluencerReferralPage';
 import LoginPage from './modules/admin/pages/LoginPage';
 import BannerListPage from './modules/admin/pages/BannerListPage';
 import ReelsPage from './modules/admin/pages/ReelsPage';
 import AdminReviewsPage from './modules/admin/pages/AdminReviewsPage';
 import AdminProfilePage from './modules/admin/pages/AdminProfilePage';
-import InfluencerDetailPage from './modules/admin/pages/InfluencerDetailPage';
 import StockAdjustmentPage from './modules/admin/pages/StockAdjustmentPage';
 import StockHistoryPage from './modules/admin/pages/StockHistoryPage';
 import LowStockAlertsPage from './modules/admin/pages/LowStockAlertsPage';
@@ -149,8 +147,6 @@ function App() {
                 <Route path="coupons" element={<CouponListPage />} />
                 <Route path="coupons/add" element={<CouponFormPage />} />
                 <Route path="coupons/edit/:id" element={<CouponFormPage />} />
-                <Route path="referrals" element={<InfluencerReferralPage />} />
-                <Route path="referrals/:id" element={<InfluencerDetailPage />} />
                 <Route path="inventory/adjust" element={<StockAdjustmentPage />} />
                 <Route path="inventory/history" element={<StockHistoryPage />} />
                 <Route path="inventory/alerts" element={<LowStockAlertsPage />} />

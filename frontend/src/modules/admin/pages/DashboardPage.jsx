@@ -17,7 +17,6 @@ import {
     MapPin,
     XCircle,
     TicketPercent,
-    Share2,
     MessageSquare,
     ShieldCheck,
     Plus,
@@ -29,7 +28,6 @@ import { useAllOrders, useAllReturns } from '../../../hooks/useOrders';
 import { useProducts, useCategories, useSubCategories } from '../../../hooks/useProducts';
 import { useUsers } from '../../../hooks/useUsers';
 import { useCoupons } from '../../../hooks/useCoupons';
-import { useReferrals } from '../../../hooks/useReferrals';
 import { useUserReviews, useAdminReviews } from '../../../hooks/useReviews';
 
 const DashboardPage = () => {
@@ -44,7 +42,6 @@ const DashboardPage = () => {
     const { data: categories = [] } = useCategories();
     const { data: subcategories = [] } = useSubCategories();
     const { data: coupons = [] } = useCoupons();
-    const { data: referrals = [] } = useReferrals();
     const { data: userReviews = [] } = useUserReviews();
     const { data: adminReviews = [] } = useAdminReviews();
 
@@ -100,11 +97,10 @@ const DashboardPage = () => {
 
             // Section 5: Engagement
             { label: 'Active Coupons', value: coupons.filter(c => c.active).length, icon: TicketPercent, color: 'text-pink-500', link: '/admin/coupons' },
-            { label: 'Total Referrals', value: referrals.length, icon: Share2, color: 'text-cyan-500', link: '/admin/referrals' },
             { label: 'User Reviews', value: userReviews.length, icon: MessageSquare, color: 'text-blue-400', link: '/admin/reviews' },
             { label: 'Admin Reviews', value: adminReviews.length, icon: ShieldCheck, color: 'text-slate-600', link: '/admin/reviews' },
         ];
-    }, [orders, products, returns, userData, categories, subcategories, coupons, referrals, userReviews, adminReviews]);
+    }, [orders, products, returns, userData, categories, subcategories, coupons, userReviews, adminReviews]);
 
     const quickActions = [
         { label: 'Add Product', icon: Plus, link: '/admin/products/add', color: 'bg-emerald-50 text-emerald-600' },

@@ -134,7 +134,7 @@ const ProductCard = ({ product, showVault = true, compact = false }) => {
             onClick={() => navigate(`/product/${product.slug || product.id}`)}
             className="group/product relative bg-white border border-accent/50 rounded-2xl md:rounded-3xl overflow-hidden flex flex-col shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer h-full"
         >
-            <div className={`relative ${compact ? 'aspect-[16/9]' : 'aspect-[4/3]'} w-full overflow-hidden bg-gradient-to-b from-background to-accent/20 flex items-center justify-center`}>
+            <div className={`relative ${compact ? 'aspect-[16/9]' : 'aspect-[5/4]'} w-full overflow-hidden bg-gradient-to-b from-background to-accent/20 flex items-center justify-center`}>
                 {product.tag && (
                     <div className="absolute top-2 left-0 z-10 md:top-3">
                         <span className="bg-secondary text-white text-[7px] md:text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 md:px-3 md:py-1 rounded-r-lg shadow-sm">
@@ -160,7 +160,7 @@ const ProductCard = ({ product, showVault = true, compact = false }) => {
                 />
             </div>
 
-            <div className={`${compact ? 'p-2 md:p-3' : 'p-3 md:px-4 md:pt-4'} pb-0 flex-1 flex flex-col`}>
+            <div className={`${compact ? 'p-2 md:p-2.5' : 'p-3 md:px-4 md:pt-3'} pb-0 flex-1 flex flex-col`}>
                 <div className="flex items-center justify-between mb-1 md:mb-2">
                     <div className="flex items-center gap-1">
                         <img src={logo} alt="FarmLyf" className="h-2.5 md:h-3.5 w-auto object-contain" />
@@ -190,7 +190,7 @@ const ProductCard = ({ product, showVault = true, compact = false }) => {
                     </div>
                 </div>
 
-                <h3 className="text-[9px] md:text-[12px] font-bold text-textPrimary leading-tight mb-1 md:mb-2 line-clamp-2">
+                <h3 className="text-[9px] md:text-[12px] font-bold text-textPrimary leading-tight mb-1 md:mb-1.5 line-clamp-2">
                     {product.name}
                 </h3>
 

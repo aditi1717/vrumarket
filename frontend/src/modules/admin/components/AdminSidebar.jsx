@@ -16,7 +16,6 @@ import {
     ChevronRight,
     Plus,
     List,
-    Share2,
     Monitor,
     Video,
     MessageSquare,
@@ -116,7 +115,6 @@ const AdminSidebar = () => {
         { icon: ArrowLeftRight, label: 'Replacements', path: '/admin/replacements' },
         { icon: TicketPercent, label: 'Coupons', path: '/admin/coupons' },
         { icon: Tag, label: 'Offers & Collections', path: '/admin/offers' },
-        { icon: Share2, label: 'Referrals', path: '/admin/referrals' },
     ];
 
     // Main highlight logic: Only one item in the main list can be green at once
@@ -595,7 +593,7 @@ const AdminSidebar = () => {
                     )}
                 </div>
 
-                {/* Remaining Menu Items (Coupons, Referrals) */}
+                {/* Remaining Menu Items */}
                 {
                     menuItems.slice(5).map((item) => (
                         <Link
