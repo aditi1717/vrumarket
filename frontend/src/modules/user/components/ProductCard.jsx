@@ -5,7 +5,6 @@ import useCartStore from '../../../store/useCartStore';
 import useUserStore from '../../../store/useUserStore';
 import { useNavigate } from 'react-router-dom';
 import { Star, Heart, ChevronDown, ShoppingCart } from 'lucide-react';
-import logo from '../../../assets/logo.webp';
 import toast from 'react-hot-toast';
 
 const calculatePer100g = (price, quantity, unit, weightStr) => {
@@ -151,6 +150,26 @@ const ProductCard = ({ product, showVault = true, compact = false }) => {
                     </div>
                 )}
 
+                <div className="absolute bottom-2 left-2 right-2 z-10 md:bottom-3 md:left-3 md:right-3 flex items-center justify-between">
+                    <div className="bg-emerald-600 text-white flex items-center gap-0.5 px-1.5 py-1 rounded text-[7px] md:text-[9px] font-bold shadow-sm">
+                        <Star size={9} fill="currentColor" />
+                        <span>{product.rating}</span>
+                    </div>
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            if (!user) {
+                                navigate('/login');
+                                return;
+                            }
+                            toggleWishlist(user.id, itemId);
+                        }}
+                        className="bg-white/90 backdrop-blur-sm border border-white/70 text-gray-400 hover:text-red-500 transition-colors p-1.5 rounded-full shadow-sm active:scale-95"
+                    >
+                        <Heart size={16} fill={isWishlisted ? '#ef4444' : 'none'} className={isWishlisted ? 'text-red-500' : ''} />
+                    </button>
+                </div>
+
                 <img
                     src={product.image}
                     alt={product.name}
@@ -161,35 +180,6 @@ const ProductCard = ({ product, showVault = true, compact = false }) => {
             </div>
 
             <div className={`${compact ? 'p-2 md:p-2.5' : 'p-3 md:px-4 md:pt-3'} pb-0 flex-1 flex flex-col`}>
-                <div className="flex items-center justify-between mb-1 md:mb-2">
-                    <div className="flex items-center gap-1">
-                        <img src={logo} alt="FarmLyf" className="h-2.5 md:h-3.5 w-auto object-contain" />
-                        <span className="font-brand font-bold text-[7px] md:text-[10px] uppercase tracking-wide text-primary line-clamp-1">
-                            PREMIUM
-                        </span>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                        <div className="bg-emerald-600 text-white flex items-center gap-0.5 px-1 py-0.5 rounded text-[7px] md:text-[9px] font-bold shrink-0">
-                            <Star size={9} fill="currentColor" />
-                            <span>{product.rating}</span>
-                        </div>
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                if (!user) {
-                                    navigate('/login');
-                                    return;
-                                }
-                                toggleWishlist(user.id, itemId);
-                            }}
-                            className="text-gray-300 hover:text-red-500 transition-colors p-0.5 active:scale-95"
-                        >
-                            <Heart size={16} fill={isWishlisted ? '#ef4444' : 'none'} className={isWishlisted ? 'text-red-500' : ''} />
-                        </button>
-                    </div>
-                </div>
-
                 <h3 className="text-[9px] md:text-[12px] font-bold text-textPrimary leading-tight mb-1 md:mb-1.5 line-clamp-2">
                     {product.name}
                 </h3>
