@@ -126,6 +126,14 @@ const ProductFormPage = () => {
 
     useEffect(() => {
         if (isEdit && productToEdit) {
+            const normalizedVariants = productToEdit.variants?.length
+                ? productToEdit.variants.map((variant, index) => ({
+                    ...variant,
+                    id: variant.id || variant._id || `${productToEdit.id || productToEdit._id}-variant-${index + 1}`,
+                    sku: variant.sku || '',
+                }))
+                : null;
+
             // Normalize nutrition data
             let normalizedNutrition = productToEdit.nutrition || [];
             if (productToEdit.nutrition && !Array.isArray(productToEdit.nutrition)) {
@@ -144,7 +152,7 @@ const ProductFormPage = () => {
             setFormData(prev => ({
                 ...prev, // Keep defaults if db fields are missing
                 ...productToEdit,
-                variants: productToEdit.variants?.length ? productToEdit.variants : prev.variants,
+                variants: normalizedVariants || prev.variants,
                 nutrition: normalizedNutrition.length ? normalizedNutrition : [],
                 specifications: productToEdit.specifications?.length ? productToEdit.specifications : [],
                 faqs: productToEdit.faqs?.length ? productToEdit.faqs : [],
