@@ -51,22 +51,28 @@ const ProductCard = ({ product, showVault = true, compact = false }) => {
     const wishlistMap = useUserStore((state) => state.wishlist);
     const userWishlist = user ? (wishlistMap[user.id] || []) : [];
 
-    const hasVariants = Array.isArray(product.variants) && product.variants.length > 0;
-    const hasMultipleVariants = (product.variants?.length || 0) > 1;
+    const fallbackVariant = {
+        id: `${product.id || product._id || product.slug || product.name}-default`,
+        quantity: product.quantity || '',
+        unit: product.unit || '',
+        weight: product.weight || 'Standard',
+        price: product.price || 0,
+        mrp: product.mrp || product.price || 0,
+        stock: product.stock?.quantity || 0,
+    };
+    const variantOptions = Array.isArray(product.variants) && product.variants.length > 0
+        ? product.variants
+        : [fallbackVariant];
+    const hasVariants = variantOptions.length > 0;
+    const hasMultipleVariants = variantOptions.length > 1;
     const [selectedVariantId, setSelectedVariantId] = useState('');
     const [isVariantMenuOpen, setIsVariantMenuOpen] = useState(false);
     const variantMenuRef = useRef(null);
 
     useEffect(() => {
-        if (!hasVariants) {
-            setSelectedVariantId('');
-            setIsVariantMenuOpen(false);
-            return;
-        }
-
-        setSelectedVariantId(String(product.variants[0].id));
+        setSelectedVariantId(String(variantOptions[0].id));
         setIsVariantMenuOpen(false);
-    }, [hasVariants, product]);
+    }, [product.id, product._id, product.slug, variantOptions[0]?.id]);
 
     useEffect(() => {
         if (!isVariantMenuOpen) return undefined;
@@ -87,17 +93,17 @@ const ProductCard = ({ product, showVault = true, compact = false }) => {
     }, [isVariantMenuOpen]);
 
     const defaultVariant = hasVariants
-        ? product.variants.reduce((lowest, variant) => (
+        ? variantOptions.reduce((lowest, variant) => (
             Number(variant.price || 0) < Number(lowest.price || 0) ? variant : lowest
-        ), product.variants[0])
+        ), variantOptions[0])
         : null;
     const selectedVariant = hasVariants
-        ? product.variants.find((variant) => String(variant.id) === String(selectedVariantId)) || null
+        ? variantOptions.find((variant) => String(variant.id) === String(selectedVariantId)) || null
         : null;
     const activeVariant = selectedVariant || defaultVariant;
     const displayVariant = activeVariant || defaultVariant;
 
-    const itemId = hasVariants ? (displayVariant?.id || product.variants[0].id) : product.id;
+    const itemId = displayVariant?.id || product.id;
     const isWishlisted = userWishlist.includes(itemId);
 
     const displayPrice = hasVariants
@@ -189,7 +195,7 @@ const ProductCard = ({ product, showVault = true, compact = false }) => {
                 </h3>
 
                 <div className={`mt-auto ${compact ? 'space-y-0.5' : 'space-y-0.5 md:space-y-1'}`}>
-                    {hasMultipleVariants && (
+                    {hasVariants && (
                         <div
                             ref={variantMenuRef}
                             className="relative"
@@ -202,7 +208,7 @@ const ProductCard = ({ product, showVault = true, compact = false }) => {
                                 aria-haspopup="listbox"
                                 aria-expanded={isVariantMenuOpen}
                             >
-                                <span>{selectedVariant ? getVariantLabel(selectedVariant) : 'Choose an option'}</span>
+                                <span>{selectedVariant ? getVariantLabel(selectedVariant) : getVariantLabel(defaultVariant)}</span>
                                 <ChevronDown size={14} className={`transition-transform ${isVariantMenuOpen ? 'rotate-180' : ''}`} />
                             </button>
 
@@ -212,7 +218,7 @@ const ProductCard = ({ product, showVault = true, compact = false }) => {
                                     role="listbox"
                                     aria-label={`Weight options for ${product.name}`}
                                 >
-                                    {product.variants.map((variant) => {
+                                    {variantOptions.map((variant) => {
                                         const isSelected = String(variant.id) === String(selectedVariantId);
 
                                         return (

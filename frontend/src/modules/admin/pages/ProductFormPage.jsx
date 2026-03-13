@@ -18,7 +18,7 @@ import {
 import ReactQuill, { Quill } from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 import BlotFormatter from 'quill-blot-formatter';
-import { useProducts, useProduct, useAddProduct, useUpdateProduct, useCategories, useSubCategories, useUploadImage } from '../../../hooks/useProducts';
+import { useProducts, useProduct, useAddProduct, useUpdateProduct, useCategories, useUploadImage } from '../../../hooks/useProducts';
 import { useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -46,7 +46,21 @@ const BENEFIT_TITLES = [
     'Rich in Antioxidants', 'Heart Healthy', 'Boosts Immunity', 'High Protein', 'Rich in Fiber', 'Good for Digestion', 'Weight Management', 'Energy Booster', 'Skin Health', 'Bone Health'
 ];
 
-const UNIT_OPTIONS = ['g', 'kg'];
+const UNIT_OPTIONS = [
+    'ml',
+    'ltr',
+    'litre',
+    'g',
+    'grms',
+    'kg',
+    'pcs',
+    'cup',
+    'pouch',
+    'packet',
+    'bottle',
+    'tub',
+    'jar'
+];
 const SuggestionInput = ({ value, onChange, placeholder, options }) => {
     const [show, setShow] = useState(false);
     return (
@@ -89,15 +103,12 @@ const ProductFormPage = () => {
     const updateProductMutation = useUpdateProduct();
     const uploadImageMutation = useUploadImage();
     const { data: dbCategories = [] } = useCategories();
-    const { data: dbSubCategories = [] } = useSubCategories();
-
     const isEdit = Boolean(id);
 
     const [formData, setFormData] = useState({
         name: '',
         brand: '',
         category: '',
-        subcategory: '',
         tag: '',
         image: '',
         images: [],
@@ -504,7 +515,7 @@ const ProductFormPage = () => {
                                                 value={variant.quantity || ''}
                                                 onChange={(e) => handleVariantChange(variant.id, 'quantity', e.target.value)}
                                                 placeholder="250"
-                                                className="w-full bg-transparent p-3 text-xs font-bold text-black outline-none"
+                                                className="no-number-spinner w-full bg-transparent p-3 text-xs font-bold text-black outline-none"
                                             />
                                             <div className="w-px h-6 bg-gray-200"></div>
                                             <select
@@ -697,23 +708,6 @@ const ProductFormPage = () => {
                                     {dbCategories.filter(c => c.status === 'Active').map(cat => (
                                         <option key={cat.id || cat._id} value={cat.slug}>{cat.name}</option>
                                     ))}
-                                </select>
-                            </div>
-                            <div className="flex flex-col gap-2">
-                                <label className="text-[10px] font-black text-black uppercase tracking-widest ml-1 text-left">Sub-Category</label>
-                                <select
-                                    name="subcategory"
-                                    value={formData.subcategory}
-                                    onChange={handleChange}
-                                    className="w-full bg-white border border-gray-300 rounded-2xl p-4 text-xs font-bold text-black outline-none focus:border-black transition-all cursor-pointer"
-                                >
-                                    <option value="">None (Optional)</option>
-                                    {dbSubCategories
-                                        .filter(sub => sub.status === 'Active')
-                                        .map(sub => (
-                                            <option key={sub.id || sub._id} value={sub.name}>{sub.name}</option>
-                                        ))
-                                    }
                                 </select>
                             </div>
                         </div>
