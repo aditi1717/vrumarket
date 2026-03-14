@@ -131,7 +131,7 @@ const CartDrawer = () => {
     if (!isCartDrawerOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[140] overscroll-none">
+        <div className="fixed inset-0 z-[11000] overscroll-none">
             <button
                 type="button"
                 aria-label="Close cart drawer"
@@ -255,7 +255,10 @@ const CartDrawer = () => {
                             </div>
                         </div>
 
-                        <div className="border-t border-accent/30 bg-white px-4 py-4 shadow-[0_-4px_10px_rgba(0,0,0,0.02)] z-10">
+                        <div
+                            className="border-t border-accent/30 bg-white px-4 py-4 shadow-[0_-4px_10px_rgba(0,0,0,0.02)] z-10"
+                            style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))' }}
+                        >
                             <div className="mb-3.5 flex items-center justify-between">
                                 <span className="text-[14px] font-bold text-textPrimary uppercase tracking-wide">Subtotal</span>
                                 <span className="text-[17px] font-black text-primary">Rs.{subtotal.toFixed(2)}</span>
