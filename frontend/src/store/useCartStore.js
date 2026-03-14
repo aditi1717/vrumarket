@@ -8,20 +8,29 @@ const useCartStore = create(
         (set, get) => ({
             cartItems: {}, // { userId: [{ packId, qty }] }
             appliedCoupons: {}, // { userId: couponData }
+            isCartDrawerOpen: false,
 
             getCart: (userId) => get().cartItems[userId || 'guest'] || [],
+            openCartDrawer: () => set({ isCartDrawerOpen: true }),
+            closeCartDrawer: () => set({ isCartDrawerOpen: false }),
 
-            addToCart: (userId, packId, qty = 1) => {
+            addToCart: (userId, packId, qty = 1, itemMeta = null) => {
                 const effectiveId = userId || 'guest';
                 const cart = get().cartItems;
-                const userCart = cart[effectiveId] || [];
+                const userCart = [...(cart[effectiveId] || [])];
 
                 const existingItemIndex = userCart.findIndex(item => String(item.packId) === String(packId));
 
                 if (existingItemIndex > -1) {
                     userCart[existingItemIndex].qty += qty;
+                    if (itemMeta) {
+                        userCart[existingItemIndex].itemMeta = {
+                            ...(userCart[existingItemIndex].itemMeta || {}),
+                            ...itemMeta,
+                        };
+                    }
                 } else {
-                    userCart.push({ packId, qty });
+                    userCart.push({ packId, qty, itemMeta: itemMeta || null });
                 }
 
                 set({ cartItems: { ...cart, [effectiveId]: userCart } });
@@ -121,6 +130,10 @@ const useCartStore = create(
         {
             name: 'farmlyf_cart', // unique name
             storage: createJSONStorage(() => localStorage),
+            partialize: (state) => ({
+                cartItems: state.cartItems,
+                appliedCoupons: state.appliedCoupons,
+            }),
         }
     )
 );

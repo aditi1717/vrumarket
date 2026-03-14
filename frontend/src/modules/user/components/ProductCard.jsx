@@ -45,7 +45,7 @@ const getVariantLabel = (variant) => {
 const ProductCard = ({ product, showVault = true, compact = false }) => {
     const navigate = useNavigate();
     const { user } = useAuth();
-    const { addToCart, getCart } = useCartStore();
+    const { addToCart, getCart, openCartDrawer } = useCartStore();
     const toggleWishlist = useUserStore((state) => state.toggleWishlist);
     const wishlistMap = useUserStore((state) => state.wishlist);
     const userWishlist = user ? (wishlistMap[user.id] || []) : [];
@@ -126,6 +126,17 @@ const ProductCard = ({ product, showVault = true, compact = false }) => {
     const selectionRequired = hasMultipleVariants && !selectedVariant;
     const cartItems = getCart(user?.id);
     const isInCart = !selectionRequired && cartItems.some((item) => String(item.packId) === String(itemId));
+    const cartItemMeta = {
+        name: product.name,
+        weight: displayVariant?.weight || product.weight || 'Standard',
+        price: displayPrice,
+        mrp: displayMrp,
+        image: product.image,
+        category: product.category,
+        slug: product.slug,
+        productId: product.id || product._id,
+        stock: activeStock,
+    };
 
     return (
         <motion.div
@@ -268,7 +279,8 @@ const ProductCard = ({ product, showVault = true, compact = false }) => {
                                     return;
                                 }
 
-                                addToCart(user?.id, itemId, 1);
+                                addToCart(user?.id, itemId, 1, cartItemMeta);
+                                openCartDrawer();
                             }}
                             disabled={!selectionRequired && activeStock <= 0}
                             className={`group/btn w-full py-3 md:py-3.5 rounded-t-none rounded-b-2xl md:rounded-b-3xl text-[8px] md:text-[10px] font-bold uppercase tracking-[0.18em] active:scale-[0.99] flex items-center justify-center border-t translate-y-0 md:translate-y-full group-hover/product:translate-y-0 transition-[transform,background-color] duration-300 ease-out shadow-inner ${!selectionRequired && activeStock <= 0
