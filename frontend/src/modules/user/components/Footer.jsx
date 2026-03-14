@@ -76,6 +76,8 @@ const Footer = () => {
         }
     }, [serverData]);
 
+    const isExternalUrl = (url = '') => /^(https?:\/\/|mailto:|tel:|#)/i.test(url);
+
     return (
         <footer className="bg-[#2C2C2C] text-white pt-10 md:pt-20 pb-10 px-4 md:px-12 relative overflow-hidden border-t border-white/10">
             {/* Newsletter Section */}
@@ -121,10 +123,22 @@ const Footer = () => {
                         <ul className="space-y-2 md:space-y-4 text-white/70">
                             {col.links.map((link, i) => (
                                 <li key={i}>
-                                    <Link to={link.url} className="hover:text-secondary transition-colors flex items-center gap-2 group text-[11px] md:text-sm">
-                                        <ArrowRight size={12} md:size={14} className="group-hover:translate-x-1 transition-transform" />
-                                        {link.label}
-                                    </Link>
+                                    {isExternalUrl(link.url) ? (
+                                        <a
+                                            href={link.url}
+                                            target={link.url.startsWith('http') ? '_blank' : undefined}
+                                            rel={link.url.startsWith('http') ? 'noopener noreferrer' : undefined}
+                                            className="hover:text-secondary transition-colors flex items-center gap-2 group text-[11px] md:text-sm"
+                                        >
+                                            <ArrowRight size={12} md:size={14} className="group-hover:translate-x-1 transition-transform" />
+                                            {link.label}
+                                        </a>
+                                    ) : (
+                                        <Link to={link.url} className="hover:text-secondary transition-colors flex items-center gap-2 group text-[11px] md:text-sm">
+                                            <ArrowRight size={12} md:size={14} className="group-hover:translate-x-1 transition-transform" />
+                                            {link.label}
+                                        </Link>
+                                    )}
                                 </li>
                             ))}
                         </ul>

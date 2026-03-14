@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Save, RotateCcw, Globe, Eye, ImageIcon, Type, Upload } from 'lucide-react';
+import { ArrowLeft, Save, RotateCcw, Globe, Eye } from 'lucide-react';
 import ReactQuill, { Quill } from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 import BlotFormatter from 'quill-blot-formatter';
@@ -181,6 +181,10 @@ const StaticPageEditor = () => {
                 </div>
             </div>
 
+            <div className="rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-900">
+                <span className="font-bold">Website Route:</span> <code>{pageConfig.publicPath}</code>
+            </div>
+
             {/* Editor Area */}
             <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden p-1">
                 <div className="h-[600px] flex flex-col">
@@ -202,7 +206,7 @@ const StaticPageEditor = () => {
                 </h4>
                 <p className="text-xs text-blue-700 leading-relaxed">
                     Make sure to use proper headings (H1, H2) within the content for better visibility on search engines.
-                    This content will be directly rendered on the website at <b>/pages/{pageId}</b>.
+                    This content will be directly rendered on the website at <b>{pageConfig.publicPath}</b>.
                 </p>
             </div>
 

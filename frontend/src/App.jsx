@@ -66,6 +66,7 @@ import BlogFormPage from './modules/admin/pages/BlogFormPage'; // New Page
 import BlogDetailPage from './modules/user/pages/BlogDetailPage'; // New Page
 import EnquiriesPage from './modules/admin/pages/EnquiriesPage';
 import ProtectedRoute from './components/ProtectedRoute'; // Auth Guard
+import { PAGES_CONFIG } from './config/pagesConfig';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 // import { Provider } from 'react-redux'; // Removed
@@ -88,6 +89,8 @@ const queryClient = new QueryClient({
 });
 
 function App() {
+  const staticPageRoutes = Object.keys(PAGES_CONFIG);
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
@@ -116,9 +119,9 @@ function App() {
                 <Route path="wishlist" element={<WishlistPage />} />
                 <Route path="vault" element={<VaultPage />} />
                 <Route path="profile/:tab?" element={<ProfilePage />} />
-                <Route path="about-us" element={<InfoPage type="about-us" />} />
-                <Route path="privacy-policy" element={<InfoPage type="privacy-policy" />} />
-                <Route path="terms-conditions" element={<InfoPage type="terms-conditions" />} />
+                {staticPageRoutes.map((pageSlug) => (
+                  <Route key={pageSlug} path={pageSlug} element={<InfoPage type={pageSlug} />} />
+                ))}
                 <Route path="contact-us" element={<ContactUsPage />} />
                 <Route path="blog/:slug" element={<BlogDetailPage />} />
                 <Route path="login" element={<AuthPage />} />

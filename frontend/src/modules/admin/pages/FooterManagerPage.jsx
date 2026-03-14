@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useWebsiteContent, useUpdateWebsiteContent } from '../../../hooks/useContent';
+import { PAGE_ROUTE_OPTIONS } from '../../../config/pagesConfig';
 
 const DEFAULT_FOOTER_CONFIG = {
     brand: {
@@ -131,6 +132,30 @@ const FooterManagerPage = () => {
     const updateLink = (colIndex, linkIndex, field, value) => {
         const newColumns = [...config.columns];
         newColumns[colIndex].links[linkIndex][field] = value;
+        setConfig({ ...config, columns: newColumns });
+    };
+
+    const getLinkRouteValue = (url) => {
+        const matchedRoute = PAGE_ROUTE_OPTIONS.find((route) => route.url === url);
+        return matchedRoute ? matchedRoute.url : '__custom__';
+    };
+
+    const handleRouteSelect = (colIndex, linkIndex, selectedUrl) => {
+        if (selectedUrl === '__custom__') {
+            return;
+        }
+
+        const matchedRoute = PAGE_ROUTE_OPTIONS.find((route) => route.url === selectedUrl);
+        if (!matchedRoute) {
+            return;
+        }
+
+        const newColumns = [...config.columns];
+        newColumns[colIndex].links[linkIndex] = {
+            ...newColumns[colIndex].links[linkIndex],
+            label: matchedRoute.label,
+            url: matchedRoute.url
+        };
         setConfig({ ...config, columns: newColumns });
     };
 
@@ -348,7 +373,7 @@ const FooterManagerPage = () => {
                         <div className="space-y-3">
                             {col.links.map((link, linkIndex) => (
                                 <div key={linkIndex} className="flex gap-2 items-center group">
-                                    <div className="flex-1 grid grid-cols-2 gap-2">
+                                    <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-2">
                                         <input
                                             type="text"
                                             placeholder="Label (e.g. About Us)"
@@ -357,9 +382,22 @@ const FooterManagerPage = () => {
                                             className="bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 text-xs font-medium text-footerBg focus:bg-white focus:border-primary transition-all disabled:bg-gray-100 disabled:text-gray-500"
                                             disabled={!isEditing}
                                         />
+                                        <select
+                                            value={getLinkRouteValue(link.url)}
+                                            onChange={(e) => handleRouteSelect(colIndex, linkIndex, e.target.value)}
+                                            className="bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 text-xs font-medium text-footerBg focus:bg-white focus:border-primary transition-all disabled:bg-gray-100 disabled:text-gray-500"
+                                            disabled={!isEditing}
+                                        >
+                                            <option value="__custom__">Custom Link</option>
+                                            {PAGE_ROUTE_OPTIONS.map((route) => (
+                                                <option key={route.slug} value={route.url}>
+                                                    {route.label} ({route.url})
+                                                </option>
+                                            ))}
+                                        </select>
                                         <input
                                             type="text"
-                                            placeholder="URL (e.g. /about)"
+                                            placeholder="URL (e.g. /about-us or https://example.com)"
                                             value={link.url}
                                             onChange={(e) => updateLink(colIndex, linkIndex, 'url', e.target.value)}
                                             className="bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 text-xs font-medium text-gray-500 focus:bg-white focus:border-primary transition-all disabled:bg-gray-100 disabled:text-gray-500"
@@ -379,12 +417,24 @@ const FooterManagerPage = () => {
                         </div>
 
                         {isEditing && (
-                            <button
-                                onClick={() => addLink(colIndex)}
-                                className="mt-6 w-full py-3 border border-dashed border-gray-200 rounded-xl text-xs font-bold text-gray-400 uppercase tracking-widest hover:border-primary hover:text-primary hover:bg-primary/5 transition-all flex items-center justify-center gap-2"
-                            >
-                                <Plus size={14} /> Add Link
-                            </button>
+                            <>
+                                <div className="mt-4 rounded-2xl border border-blue-100 bg-blue-50 p-4">
+                                    <p className="text-[10px] font-black text-blue-700 uppercase tracking-widest mb-2">Available Page Routes</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {PAGE_ROUTE_OPTIONS.map((route) => (
+                                            <span key={route.slug} className="rounded-full border border-blue-200 bg-white px-3 py-1 text-[11px] font-semibold text-blue-700">
+                                                {route.label}: {route.url}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => addLink(colIndex)}
+                                    className="mt-6 w-full py-3 border border-dashed border-gray-200 rounded-xl text-xs font-bold text-gray-400 uppercase tracking-widest hover:border-primary hover:text-primary hover:bg-primary/5 transition-all flex items-center justify-center gap-2"
+                                >
+                                    <Plus size={14} /> Add Link
+                                </button>
+                            </>
                         )}
                     </div>
                 ))}
