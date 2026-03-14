@@ -2,7 +2,7 @@
 import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 
 // Import generated images from project assets
@@ -50,7 +50,6 @@ import { useCategories } from '../../../hooks/useProducts';
 const CategoryStrip = () => {
     const { data: categories = [], isLoading } = useCategories();
     const scrollRef = useRef(null);
-    const navigate = useNavigate();
 
     // Show only active categories enabled for shop strip
     const displayCategories = categories.filter(c => c.showInShopByCategory === true && c.status === 'Active');
@@ -70,6 +69,13 @@ const CategoryStrip = () => {
         }
         return colors[Math.abs(hash) % colors.length];
     };
+
+    const toSlug = (value) => String(value || '')
+        .trim()
+        .toLowerCase()
+        .replace(/&/g, 'and')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
 
     // ... variants ...
 
@@ -123,46 +129,48 @@ const CategoryStrip = () => {
                                 <motion.div
                                     key={cat._id || cat.id}
                                     whileHover={{ y: -10, transition: { duration: 0.3 } }}
-                                    // Navigate to subcategory page filter? Currently assumes structure
-                                    onClick={() => navigate(`/category/${cat.slug}`)}
-                                    className="relative min-w-[160px] md:min-w-[280px] h-14 md:h-24 flex items-center cursor-pointer group/item flex-shrink-0"
+                                    className="relative min-w-[160px] md:min-w-[280px] h-14 md:h-24 flex items-center group/item flex-shrink-0"
                                 >
-                                    {/* Elongated Pill Background */}
-                                    <div className={`absolute right-0 w-[90%] md:w-[85%] h-[80%] md:h-[70%] ${getColor(cat.name)} rounded-full flex items-center justify-center shadow-md border border-white/10 pl-14 md:pl-20 pr-4 md:pr-6 overflow-hidden transition-all duration-500 group-hover/item:shadow-2xl group-hover/item:border-white/30`}>
-                                        <span className="text-white font-black text-[9px] md:text-[15px] tracking-widest uppercase text-center leading-tight drop-shadow-lg z-10">
-                                            {cat.name}
-                                        </span>
-                                        {/* Reflection/Shine Effect */}
-                                        <motion.div
-                                            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 translate-x-[-150%] group-hover/item:translate-x-[150%] transition-transform duration-1000"
-                                        />
-                                    </div>
-
-                                    {/* Popping Product Image */}
-                                    <motion.div
-                                        animate={{
-                                            y: [0, -5, 0],
-                                        }}
-                                        transition={{
-                                            duration: 4,
-                                            repeat: Infinity,
-                                            ease: "easeInOut",
-                                            delay: index * 0.2
-                                        }}
-                                        className="absolute left-0 top-1/2 -translate-y-1/2 w-16 h-16 md:w-32 md:h-32 z-10 flex items-center justify-center"
+                                    <Link
+                                        to={`/category/${cat.slug || toSlug(cat.name)}`}
+                                        className="relative block w-full h-full cursor-pointer"
                                     >
-                                        <motion.img
-                                            whileHover={{ scale: 1.15, rotate: 5 }}
-                                            src={assetMap[cat.slug] || (cat.image ? (cat.image.startsWith('http') ? cat.image : `http://localhost:5000${cat.image}`) : 'https://cdn-icons-png.flaticon.com/512/3592/3592864.png')}
-                                            alt={cat.name}
-                                            loading="lazy"
-                                            decoding="async"
-                                            className="w-full h-full object-contain filter drop-shadow-[0_10px_15px_rgba(0,0,0,0.15)] group-hover/item:drop-shadow-[0_20px_30px_rgba(0,0,0,0.25)] transition-all duration-500"
-                                            onError={(e) => {
-                                                e.target.src = 'https://cdn-icons-png.flaticon.com/512/3592/3592864.png';
+                                        {/* Elongated Pill Background */}
+                                        <div className={`absolute right-0 w-[90%] md:w-[85%] h-[80%] md:h-[70%] ${getColor(cat.name)} rounded-full flex items-center justify-center shadow-md border border-white/10 pl-14 md:pl-20 pr-4 md:pr-6 overflow-hidden transition-all duration-500 group-hover/item:shadow-2xl group-hover/item:border-white/30`}>
+                                            <span className="text-white font-black text-[9px] md:text-[15px] tracking-widest uppercase text-center leading-tight drop-shadow-lg z-10">
+                                                {cat.name}
+                                            </span>
+                                            <motion.div
+                                                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 translate-x-[-150%] group-hover/item:translate-x-[150%] transition-transform duration-1000"
+                                            />
+                                        </div>
+
+                                        {/* Popping Product Image */}
+                                        <motion.div
+                                            animate={{
+                                                y: [0, -5, 0],
                                             }}
-                                        />
-                                    </motion.div>
+                                            transition={{
+                                                duration: 4,
+                                                repeat: Infinity,
+                                                ease: "easeInOut",
+                                                delay: index * 0.2
+                                            }}
+                                            className="absolute left-0 top-1/2 -translate-y-1/2 w-16 h-16 md:w-32 md:h-32 z-10 flex items-center justify-center"
+                                        >
+                                            <motion.img
+                                                whileHover={{ scale: 1.15, rotate: 5 }}
+                                                src={assetMap[cat.slug] || assetMap[toSlug(cat.name)] || (cat.image ? (cat.image.startsWith('http') ? cat.image : `http://localhost:5000${cat.image}`) : 'https://cdn-icons-png.flaticon.com/512/3592/3592864.png')}
+                                                alt={cat.name}
+                                                loading="lazy"
+                                                decoding="async"
+                                                className="w-full h-full object-contain filter drop-shadow-[0_10px_15px_rgba(0,0,0,0.15)] group-hover/item:drop-shadow-[0_20px_30px_rgba(0,0,0,0.25)] transition-all duration-500"
+                                                onError={(e) => {
+                                                    e.target.src = 'https://cdn-icons-png.flaticon.com/512/3592/3592864.png';
+                                                }}
+                                            />
+                                        </motion.div>
+                                    </Link>
                                 </motion.div>
                             ))
                         )}

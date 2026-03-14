@@ -6,6 +6,7 @@ import {
     Facebook,
     Instagram,
     Twitter,
+    MessageCircle,
     Mail,
     Phone,
     MapPin,
@@ -31,7 +32,8 @@ const DEFAULT_FOOTER_CONFIG = {
     socials: {
         facebook: '#',
         instagram: '#',
-        twitter: '#'
+        twitter: '#',
+        whatsapp: '#'
     },
     columns: [
         {
@@ -104,6 +106,11 @@ const Footer = () => {
                                 <Twitter size={16} md:size={18} />
                             </a>
                         )}
+                        {config.socials.whatsapp && (
+                            <a href={config.socials.whatsapp} target="_blank" rel="noopener noreferrer" className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/5 border border-white/20 flex items-center justify-center hover:bg-secondary hover:border-secondary hover:text-white transition-all">
+                                <MessageCircle size={16} md:size={18} />
+                            </a>
+                        )}
                     </div>
                 </div>
 
@@ -164,7 +171,13 @@ const Footer = () => {
 
             {/* Bottom Credit */}
             <div className="container mx-auto flex flex-col md:flex-row justify-between items-center pt-8 border-t border-white/10 font-medium text-xs text-white/60 gap-4">
-                <p className="flex items-center gap-1">© 2026 <img src={logo} alt="FarmLyf" className="h-4 w-auto object-contain" />. Crafted with ❤️ for healthy living.</p>
+                <p className="flex flex-col sm:flex-row items-center gap-2 text-center md:text-left">
+                    <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-white/80">
+                        <Leaf size={14} className="text-secondary" />
+                        <span>&copy; 2026 vrushahi market</span>
+                    </span>
+                    <span className="text-white/60">Powered by Vrushahi Soya products</span>
+                </p>
                 <div className="flex gap-6">
                     <Link to="/privacy-policy" className="hover:text-secondary transition-colors">Privacy</Link>
                     <Link to="/terms-conditions" className="hover:text-secondary transition-colors">Terms</Link>

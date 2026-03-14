@@ -71,11 +71,12 @@ export const AdminTableRow = ({ children, className = '', onClick }) => {
 /**
  * Individual Data Cell
  */
-export const AdminTableCell = ({ children, className = '', onClick }) => {
+export const AdminTableCell = ({ children, className = '', onClick, ...props }) => {
     return (
         <td
             className={`px-4 py-2.5 whitespace-nowrap ${className}`}
             onClick={onClick}
+            {...props}
         >
             {children}
         </td>

@@ -1,55 +1,18 @@
 
-import React, { useState } from 'react';
-import { useCategories, useSubCategories, useProducts } from '../../../hooks/useProducts';
-import { useQuery } from '@tanstack/react-query';
+import React, { useEffect, useRef, useState } from 'react';
+import { useCategories } from '../../../hooks/useProducts';
 import {
     Store,
-    Nut,
-    Coffee,
-    Calendar,
-    Sprout,
-    Gift,
-    Gem,
     ChevronDown,
     Home
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const shopMenuData = [
-    {
-        title: 'NUTS',
-        items: ['WALNUTS (AKHROT)', 'ALMONDS (BADAM)', 'CASHEW (KAJU)', 'PISTACHIO (PISTA)']
-    },
-    {
-        title: 'DRIED FRUITS',
-        items: ['RAISINS (KISHMISH)', 'DRIED FIGS (ANJEER)', 'DRIED APRICOTS (KHUBANI)', 'DRIED KIWI', 'DRIED PRUNES (AALOOBUKHAARA)']
-    },
-    {
-        title: 'DATES',
-        items: ['WET DATES (KHAJUR)', 'DRY DATES (CHUARA)']
-    },
-    {
-        title: 'SEEDS',
-        items: ['CHIA SEEDS', 'CUCUMBER SEEDS', 'FLAX SEEDS', 'MUSK MELON SEEDS', 'PUMPKIN SEEDS', 'QUINOA SEEDS', 'SUNFLOWER SEEDS', 'FOX NUTS (PHOOL MAKHANA)']
-    },
-    {
-        title: 'EXOTIC NUTS',
-        items: ['HAZELNUTS', 'MACADAMIA NUTS', 'PECAN NUTS']
-    },
-    {
-        title: 'MIXES',
-        items: ['BERRIES MIX', 'NUT MIX', 'SEEDS MIX', 'TRAIL MIX']
-    }
-];
-
-
-
 const CategoryNav = () => {
     const [activeMenu, setActiveMenu] = useState(null);
     const { data: rawCategories = [] } = useCategories();
-    const { data: rawSubCategories = [] } = useSubCategories();
-    const { data: products = [] } = useProducts();
+    const navRef = useRef(null);
 
 
     // Deduplicate and filter active categories
@@ -66,22 +29,17 @@ const CategoryNav = () => {
         return unique.sort((a, b) => (a.order || 0) - (b.order || 0));
     }, [rawCategories]);
 
-    // Build Shop Menu Data properly from DB
+    // Build Shop dropdown from categories only.
     const shopMenuData = React.useMemo(() => {
-        return categoriesDB.map(cat => {
-            const catId = cat._id || cat.id;
-            const subs = rawSubCategories.filter(sub => {
-                const subParentId = sub.parent?._id || sub.parent;
-                return subParentId && catId && String(subParentId) === String(catId) && sub.status === 'Active' && sub.showInNavbar !== false;
-            });
-
-            return {
-                title: cat.name,
+        return [{
+            title: 'Shop Categories',
+            items: categoriesDB.map(cat => ({
+                name: cat.name,
                 slug: cat.slug,
-                items: subs.map(s => ({ name: s.name, slug: s.slug }))
-            };
-        });
-    }, [categoriesDB, rawSubCategories]);
+                path: `/category/${cat.slug}`
+            }))
+        }];
+    }, [categoriesDB]);
 
     // Build Top Level Navigation Items
     const navItems = React.useMemo(() => {
@@ -98,38 +56,32 @@ const CategoryNav = () => {
 
         // Add Categories as top level links
         categoriesDB.forEach(cat => {
-            const catId = cat._id || cat.id;
-
-            // Find subcategories for this category
-            const catSubs = rawSubCategories.filter(sub => {
-                const subParentId = sub.parent?._id || sub.parent;
-                return subParentId && catId && String(subParentId) === String(catId) && sub.status === 'Active' && sub.showInNavbar !== false;
-            });
-
-            // Prepare menu data
-            const menuData = [{
-                title: 'Collections',
-                slug: cat.slug,
-                items: catSubs.map(s => ({ name: s.name, slug: s.slug }))
-            }];
-
             items.push({
                 name: cat.name,
                 icon: Store,
                 path: `/category/${cat.slug}`,
-                hasMenu: catSubs.length > 0,
-                menuType: 'categories',
-                menuData: menuData
+                hasMenu: false
             });
         });
 
         return items;
-    }, [categoriesDB, rawSubCategories, shopMenuData]);
+    }, [categoriesDB, shopMenuData]);
 
     const activeItem = navItems.find(c => c.name === activeMenu);
 
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (navRef.current && !navRef.current.contains(event.target)) {
+                setActiveMenu(null);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
     return (
-        <div className="bg-secondary text-background py-3.5 hidden md:block border-t border-primary/20 shadow-lg relative" style={{ zIndex: 10000 }}>
+        <div ref={navRef} className="bg-secondary text-background py-3.5 hidden md:block border-t border-primary/20 shadow-lg relative" style={{ zIndex: 10000 }}>
             <div className="w-full overflow-x-auto no-scrollbar px-4 lg:px-12">
                 <div className="w-max min-w-full flex items-center justify-between gap-6 lg:gap-8 text-[10px] lg:text-[11px] font-black tracking-widest uppercase">
                     {navItems.map((cat, index) => {
@@ -141,15 +93,26 @@ const CategoryNav = () => {
                                 onMouseEnter={() => cat.hasMenu && setActiveMenu(cat.name)}
                                 onMouseLeave={() => cat.hasMenu && setActiveMenu(null)}
                             >
-                                <Link
-                                    to={cat.path}
-                                    onClick={() => setActiveMenu(null)}
-                                    className={`flex items-center gap-2 py-1 transition-all duration-300 ${activeMenu === cat.name ? 'text-white' : 'hover:text-white text-background/90'}`}
-                                >
-                                    <Icon size={14} className={`transition-colors duration-300 ${activeMenu === cat.name ? 'text-white' : 'text-white/80'}`} />
-                                    <span className="whitespace-nowrap">{cat.name}</span>
-                                    {cat.hasMenu && <ChevronDown size={11} className={`ml-0.5 transition-transform duration-300 ${activeMenu === cat.name ? 'rotate-180' : ''}`} />}
-                                </Link>
+                                {cat.hasMenu ? (
+                                    <button
+                                        type="button"
+                                        onClick={() => setActiveMenu(prev => (prev === cat.name ? null : cat.name))}
+                                        className={`flex items-center gap-2 py-1 transition-all duration-300 ${activeMenu === cat.name ? 'text-white' : 'hover:text-white text-background/90'}`}
+                                    >
+                                        <Icon size={14} className={`transition-colors duration-300 ${activeMenu === cat.name ? 'text-white' : 'text-white/80'}`} />
+                                        <span className="whitespace-nowrap">{cat.name}</span>
+                                        <ChevronDown size={11} className={`ml-0.5 transition-transform duration-300 ${activeMenu === cat.name ? 'rotate-180' : ''}`} />
+                                    </button>
+                                ) : (
+                                    <Link
+                                        to={cat.path}
+                                        onClick={() => setActiveMenu(null)}
+                                        className={`flex items-center gap-2 py-1 transition-all duration-300 ${activeMenu === cat.name ? 'text-white' : 'hover:text-white text-background/90'}`}
+                                    >
+                                        <Icon size={14} className={`transition-colors duration-300 ${activeMenu === cat.name ? 'text-white' : 'text-white/80'}`} />
+                                        <span className="whitespace-nowrap">{cat.name}</span>
+                                    </Link>
+                                )}
                             </div>
                         );
                     })}
@@ -166,7 +129,7 @@ const CategoryNav = () => {
                         transition={{ duration: 0.2 }}
                         className="absolute top-full left-0 w-full bg-background shadow-[0_45px_100px_-20px_rgba(0,0,0,0.3)] rounded-b-[2rem] border-t border-primary/10 overflow-hidden"
                         style={{ zIndex: 10001 }}
-                        onMouseEnter={() => setActiveMenu(activeMenu)}
+                        onMouseEnter={() => setActiveMenu(activeItem.name)}
                         onMouseLeave={() => setActiveMenu(null)}
                     >
                         <div className="max-w-[1500px] mx-auto px-12 py-12">
@@ -208,20 +171,20 @@ const CategoryNav = () => {
                                     </div>
                                 </div>
                             ) : (
-                                <div className={`grid ${activeMenu.startsWith('Shop') ? 'grid-cols-6' : 'grid-cols-4'} gap-x-10 gap-y-12`}>
+                                <div className={`${activeMenu.startsWith('Shop') ? 'max-w-6xl' : ''}`}>
                                     {activeItem.menuData?.map((section, idx) => (
                                         <div key={idx} className="space-y-6">
                                             <h4 className="text-primary font-black text-[12px] tracking-[0.15em] mb-6 border-b border-primary/10 pb-3 uppercase flex items-center gap-2.5">
                                                 <span className="w-2 h-2 rounded-full bg-accent inline-block" />
                                                 <span>{section.title}</span>
                                             </h4>
-                                            <ul className="space-y-4">
+                                            <ul className={`grid gap-x-10 gap-y-5 ${activeMenu.startsWith('Shop') ? 'grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1 md:grid-cols-2'}`}>
                                                 {section.items.map((item, i) => (
                                                     <li key={i} className="group/item">
                                                         <div className="flex items-start gap-2.5">
                                                             <span className="w-1.5 h-1.5 rounded-full bg-primary mt-[6px] flex-shrink-0" />
                                                             <Link
-                                                                to={`/category/${section.slug}/${item.slug}`}
+                                                                to={item.path || `/category/${item.slug}`}
                                                                 onClick={() => setActiveMenu(null)}
                                                                 className="text-textPrimary group-hover/item:text-primary font-black text-[12px] leading-tight transition-all duration-200 tracking-wide uppercase"
                                                             >

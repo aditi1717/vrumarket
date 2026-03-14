@@ -30,6 +30,7 @@ import shipmentRoutes from './routes/shipmentRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import offerRoutes from './routes/offerRoutes.js';
 import replacementRoutes from './routes/replacementRoutes.js';
+import enquiryRoutes from './routes/enquiryRoutes.js';
 
 dotenv.config();
 
@@ -118,6 +119,7 @@ app.use('/api/shipments', shipmentRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/offers', offerRoutes);
 app.use('/api/replacements', replacementRoutes);
+app.use('/api/enquiries', enquiryRoutes);
 
 // 404 Handler
 app.use((req, res) => {

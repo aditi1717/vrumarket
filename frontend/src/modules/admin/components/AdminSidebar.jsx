@@ -73,6 +73,7 @@ const AdminSidebar = () => {
     const isPathInProducts = (path) => path.startsWith('/admin/products');
     const isPathInOrders = (path) => path.startsWith('/admin/orders');
     const isPathInPages = (path) => path.startsWith('/admin/pages');
+    const isPathInEnquiries = (path) => path.startsWith('/admin/enquiries');
     const isPathInBlogs = (path) => path.startsWith('/admin/blogs');
     const isPathInReviews = (path) => path.startsWith('/admin/reviews');
     const isPathInNotifications = (path) => path.startsWith('/admin/notifications');
@@ -348,7 +349,6 @@ const AdminSidebar = () => {
                                 <div className="space-y-1">
                                     {[
                                         { name: 'About Us', id: 'about-us', icon: Info },
-                                        { name: 'Contact Us', id: 'contact-us', icon: Info },
                                         { name: 'How to Order', id: 'how-to-order', icon: Info },
                                         { name: 'Size Guide', id: 'size-guide', icon: Info },
                                         { name: 'Payment Methods', id: 'payment-methods', icon: Info },
@@ -377,6 +377,17 @@ const AdminSidebar = () => {
                         </div>
                     )}
                 </div>
+
+                <Link
+                    to="/admin/enquiries"
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all mt-1 ${isPathInEnquiries(location.pathname)
+                        ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                        : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                        }`}
+                >
+                    <MessageSquare size={20} strokeWidth={isPathInEnquiries(location.pathname) ? 2.5 : 2} />
+                    <span className="font-bold text-sm">Enquiries</span>
+                </Link>
 
                 {/* Blogs Section - Expandable */}
                 <div className="mt-1">
