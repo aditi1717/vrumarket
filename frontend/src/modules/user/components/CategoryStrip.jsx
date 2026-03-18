@@ -6,13 +6,13 @@ import { Link } from 'react-router-dom';
 
 
 // Import generated images from project assets
-import cashewImg from '../../../assets/logo.webp';
-import pistaImg from '../../../assets/logo.webp';
-import walnutImg from '../../../assets/logo.webp';
-import datesImg from '../../../assets/logo.webp';
-import almondImg from '../../../assets/logo.webp';
-import anjeerImg from '../../../assets/logo.webp';
-import raisinImg from '../../../assets/logo.webp';
+import cashewImg from '../../../assets/logo.png';
+import pistaImg from '../../../assets/logo.png';
+import walnutImg from '../../../assets/logo.png';
+import datesImg from '../../../assets/logo.png';
+import almondImg from '../../../assets/logo.png';
+import anjeerImg from '../../../assets/logo.png';
+import raisinImg from '../../../assets/logo.png';
 
 // Asset Mapping for seeded categories
 const assetMap = {

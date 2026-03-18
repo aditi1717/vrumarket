@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Quote } from 'lucide-react';
-import reviewBg from '../../../assets/logo.webp';
+import reviewBg from '../../../assets/logo.png';
 
 import { useFeaturedReviews } from '../../../hooks/useContent';
 

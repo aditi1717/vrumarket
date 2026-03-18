@@ -3,7 +3,7 @@ import { useAuth } from '../../../context/AuthContext';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, User, ArrowLeft, Leaf, Tag, Smartphone } from 'lucide-react';
 import { motion } from 'framer-motion';
-import authShowcaseImg from '../../../assets/logo.webp';
+import authShowcaseImg from '../../../assets/logo.png';
 
 const AuthPage = () => {
     const { sendOtp } = useAuth();

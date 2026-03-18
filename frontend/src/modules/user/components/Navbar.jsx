@@ -9,7 +9,7 @@ import { useCategories, useSubCategories, useProducts } from '../../../hooks/use
 import { useQuery } from '@tanstack/react-query';
 import { API_BASE_URL } from '@/lib/apiUrl';
 
-import logo from '../../../assets/logo.webp';
+import logo from '../../../assets/logo.png';
 
 const Navbar = () => {
     const { user } = useAuth();

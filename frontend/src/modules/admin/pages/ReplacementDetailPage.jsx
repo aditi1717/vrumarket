@@ -25,8 +25,8 @@ import {
     PenTool // Added generic icon for courier/edit if needed
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import baadaamImg from '../../../assets/logo.webp';
-import cashewImg from '../../../assets/logo.webp';
+import baadaamImg from '../../../assets/logo.png';
+import cashewImg from '../../../assets/logo.png';
 
 const API_URL = API_BASE_URL;
 

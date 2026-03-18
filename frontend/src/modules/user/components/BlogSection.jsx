@@ -6,7 +6,7 @@ import { useBlogs } from '../../../hooks/useContent';
 import toast from 'react-hot-toast';
 
 // Import blog images (fallback/placeholder logic if needed, but data should have URLs)
-import logoImg from '../../../assets/logo.webp';
+import logoImg from '../../../assets/logo.png';
 
 const BlogSection = () => {
     const scrollRef = useRef(null);

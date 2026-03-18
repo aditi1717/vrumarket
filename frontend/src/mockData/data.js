@@ -1,9 +1,9 @@
-import almondImg from '../assets/logo.webp';
-import cashewImg from '../assets/logo.webp';
-import datesImg from '../assets/logo.webp';
-import anjeerImg from '../assets/logo.webp';
-import walnutImg from '../assets/logo.webp';
-import dailyPackImg from '../assets/logo.webp';
+import almondImg from '../assets/logo.png';
+import cashewImg from '../assets/logo.png';
+import datesImg from '../assets/logo.png';
+import anjeerImg from '../assets/logo.png';
+import walnutImg from '../assets/logo.png';
+import dailyPackImg from '../assets/logo.png';
 
 export const SKUS = [
     { id: 'sku_1', name: 'California Almonds', unit: 'kg', price: 900, category: 'Nuts' },
