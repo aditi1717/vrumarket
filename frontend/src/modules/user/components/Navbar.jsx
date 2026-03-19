@@ -213,7 +213,7 @@ const Navbar = () => {
                     <img src={logo} alt="FarmLyf" className="h-12 md:h-16 w-auto object-contain scale-110" />
                     <div className="hidden md:flex flex-col justify-center gap-0 pl-2">
                         <span className="font-brand font-black text-[22px] tracking-[0.02em] leading-[0.9] text-primary uppercase">VRUSHAHI</span>
-                        <span className="font-brand font-bold text-[13px] tracking-[0.34em] leading-normal text-secondary uppercase">MARKET</span>
+                        <span className="font-brand font-bold text-[13px] tracking-[0.34em] leading-normal text-secondary uppercase">SOya Products</span>
                     </div>
                     {user?.accountType === 'Business' && (
                         <span className="absolute top-0 -right-8 bg-black text-white text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-tighter">Business</span>
