@@ -1,6 +1,5 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Mail, Phone, MapPin } from 'lucide-react';
 import { useWebsiteContent } from '../../../hooks/useContent';
 
 const InfoPage = ({ type }) => {
@@ -40,65 +39,6 @@ const InfoPage = ({ type }) => {
                 </div>
             )
         },
-
-        'contact-us': {
-            title: "Contact Us",
-            subtitle: "We're here to help",
-            content: (
-                <div className="max-w-4xl mx-auto space-y-10">
-                    <div className="grid md:grid-cols-2 gap-10 items-start">
-                        <div className="space-y-8">
-                            <div>
-                                <h3 className="text-2xl font-bold text-footerBg mb-3">Get in Touch</h3>
-                                <p className="text-gray-600 text-sm leading-relaxed">
-                                    Have a question about your order, want to partner with us, or simply want to say hello?
-                                    We are always ready to help.
-                                </p>
-                            </div>
-                            <div className="space-y-5">
-                                <div className="flex items-start gap-4">
-                                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary shrink-0">
-                                        <MapPin size={18} />
-                                    </div>
-                                    <div>
-                                        <h4 className="font-bold text-footerBg text-sm">Visit Us</h4>
-                                        <p className="text-gray-500 text-sm mt-1 leading-relaxed">
-                                            Office No 501, Princess center, 5th Floor,<br />
-                                            New Palasia, Indore, Madhya Pradesh 452001
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="flex items-start gap-4">
-                                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary shrink-0">
-                                        <Mail size={18} />
-                                    </div>
-                                    <div>
-                                        <h4 className="font-bold text-footerBg text-sm">Email Us</h4>
-                                        <div className="text-gray-500 text-sm mt-1 space-y-0.5">
-                                            <p>hello@farmlyf.com</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
-                            <h3 className="text-lg font-bold text-footerBg mb-4">Send a Message</h3>
-                            <form className="space-y-3">
-                                <div className="grid grid-cols-2 gap-3">
-                                    <input type="text" className="w-full bg-white border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all text-sm" placeholder="Name" />
-                                    <input type="text" className="w-full bg-white border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all text-sm" placeholder="Phone" />
-                                </div>
-                                <input type="email" className="w-full bg-white border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all text-sm" placeholder="Email Address" />
-                                <textarea rows="3" className="w-full bg-white border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all resize-none text-sm" placeholder="Your Message"></textarea>
-                                <button type="button" className="w-full bg-footerBg hover:bg-primary text-white py-3 rounded-xl font-bold uppercase text-xs tracking-widest transition-all shadow-md hover:shadow-lg">
-                                    Send Message
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            )
-        }
     };
 
     const config = defaultContentMap[type] || defaultContentMap['about-us'];
@@ -114,13 +54,13 @@ const InfoPage = ({ type }) => {
     // content can be a string (HTML from Quill) or fallback JSX
     const displayContent = pageData?.content ? (
         <div
-            className="prose prose-sm md:prose-base max-w-none text-gray-600 leading-relaxed quill-content"
+            className="quill-content"
             dangerouslySetInnerHTML={{ __html: pageData.content }}
         />
     ) : config.content;
 
     return (
-        <div className="min-h-screen bg-white py-4 md:py-8 px-4 lg:px-8">
+        <div className="min-h-screen bg-white py-4 md:py-8 px-4 lg:px-8 overflow-x-hidden">
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -131,20 +71,110 @@ const InfoPage = ({ type }) => {
                     {displaySubtitle && <p className="text-primary font-black tracking-[0.2em] uppercase text-[10px] md:text-xs">{displaySubtitle}</p>}
                 </div>
 
-                <div className="px-1 md:px-0">
+                <div className="px-1 md:px-0 overflow-x-hidden">
                     {displayContent}
                 </div>
             </motion.div>
 
             <style>{`
+                .quill-content {
+                    color: #4b5563;
+                    line-height: 1.8;
+                    font-size: 1rem;
+                    max-width: 100%;
+                    overflow-x: hidden;
+                    overflow-wrap: anywhere;
+                    word-break: break-word;
+                }
+                .quill-content h1,
+                .quill-content h2,
+                .quill-content h3,
+                .quill-content h4,
+                .quill-content h5,
+                .quill-content h6 {
+                    color: #111827;
+                    font-weight: 800;
+                    line-height: 1.2;
+                    margin-top: 1.5em;
+                    margin-bottom: 0.6em;
+                }
+                .quill-content h1 { font-size: 2.2rem; }
+                .quill-content h2 { font-size: 1.8rem; }
+                .quill-content h3 { font-size: 1.5rem; }
+                .quill-content h4 { font-size: 1.25rem; }
+                .quill-content p {
+                    margin-bottom: 1rem;
+                    max-width: 100%;
+                }
+                .quill-content strong {
+                    font-weight: 700;
+                    color: #111827;
+                }
+                .quill-content em {
+                    font-style: italic;
+                }
+                .quill-content u {
+                    text-decoration: underline;
+                }
+                .quill-content s {
+                    text-decoration: line-through;
+                }
+                .quill-content a {
+                    color: #0f766e;
+                    text-decoration: underline;
+                    word-break: break-word;
+                }
+                .quill-content ul,
+                .quill-content ol {
+                    margin: 1rem 0 1.25rem;
+                    padding-left: 1.5rem;
+                    max-width: 100%;
+                }
+                .quill-content ul {
+                    list-style: disc;
+                }
+                .quill-content ol {
+                    list-style: decimal;
+                }
+                .quill-content li {
+                    margin-bottom: 0.5rem;
+                }
+                .quill-content blockquote {
+                    border-left: 4px solid #16a34a;
+                    padding-left: 1rem;
+                    margin: 1.25rem 0;
+                    color: #374151;
+                    font-style: italic;
+                    max-width: 100%;
+                }
+                .quill-content .ql-align-center {
+                    text-align: center;
+                }
+                .quill-content .ql-align-right {
+                    text-align: right;
+                }
+                .quill-content .ql-align-justify {
+                    text-align: justify;
+                }
+                .quill-content .ql-indent-1 { padding-left: 3rem; }
+                .quill-content .ql-indent-2 { padding-left: 6rem; }
+                .quill-content .ql-indent-3 { padding-left: 9rem; }
                 .quill-content img {
+                    display: block;
                     max-width: 100%;
                     height: auto;
                     border-radius: 1rem;
+                    margin: 1.25rem 0;
                 }
                 .quill-content iframe {
                     max-width: 100%;
                 }
+                .quill-content * {
+                    max-width: 100%;
+                }
+                .quill-content .ql-size-small { font-size: 0.875rem; }
+                .quill-content .ql-size-large { font-size: 1.25rem; }
+                .quill-content .ql-size-huge { font-size: 1.5rem; }
             `}</style>
         </div >
     );

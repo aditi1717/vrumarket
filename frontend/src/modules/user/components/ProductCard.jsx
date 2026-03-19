@@ -5,7 +5,6 @@ import useCartStore from '../../../store/useCartStore';
 import useUserStore from '../../../store/useUserStore';
 import { useNavigate } from 'react-router-dom';
 import { Star, Heart, ChevronDown, ShoppingCart } from 'lucide-react';
-import logo from '../../../assets/logo.jpeg';
 import toast from 'react-hot-toast';
 
 const calculatePer100g = (price, quantity, unit, weightStr) => {
@@ -46,27 +45,33 @@ const getVariantLabel = (variant) => {
 const ProductCard = ({ product, showVault = true, compact = false }) => {
     const navigate = useNavigate();
     const { user } = useAuth();
-    const { addToCart, getCart } = useCartStore();
+    const { addToCart, getCart, openCartDrawer } = useCartStore();
     const toggleWishlist = useUserStore((state) => state.toggleWishlist);
     const wishlistMap = useUserStore((state) => state.wishlist);
     const userWishlist = user ? (wishlistMap[user.id] || []) : [];
 
-    const hasVariants = Array.isArray(product.variants) && product.variants.length > 0;
-    const hasMultipleVariants = (product.variants?.length || 0) > 1;
+    const fallbackVariant = {
+        id: `${product.id || product._id || product.slug || product.name}-default`,
+        quantity: product.quantity || '',
+        unit: product.unit || '',
+        weight: product.weight || 'Standard',
+        price: product.price || 0,
+        mrp: product.mrp || product.price || 0,
+        stock: product.stock?.quantity || 0,
+    };
+    const variantOptions = Array.isArray(product.variants) && product.variants.length > 0
+        ? product.variants
+        : [fallbackVariant];
+    const hasVariants = variantOptions.length > 0;
+    const hasMultipleVariants = variantOptions.length > 1;
     const [selectedVariantId, setSelectedVariantId] = useState('');
     const [isVariantMenuOpen, setIsVariantMenuOpen] = useState(false);
     const variantMenuRef = useRef(null);
 
     useEffect(() => {
-        if (!hasVariants) {
-            setSelectedVariantId('');
-            setIsVariantMenuOpen(false);
-            return;
-        }
-
-        setSelectedVariantId(String(product.variants[0].id));
+        setSelectedVariantId(String(variantOptions[0].id));
         setIsVariantMenuOpen(false);
-    }, [hasVariants, product]);
+    }, [product.id, product._id, product.slug, variantOptions[0]?.id]);
 
     useEffect(() => {
         if (!isVariantMenuOpen) return undefined;
@@ -87,17 +92,17 @@ const ProductCard = ({ product, showVault = true, compact = false }) => {
     }, [isVariantMenuOpen]);
 
     const defaultVariant = hasVariants
-        ? product.variants.reduce((lowest, variant) => (
+        ? variantOptions.reduce((lowest, variant) => (
             Number(variant.price || 0) < Number(lowest.price || 0) ? variant : lowest
-        ), product.variants[0])
+        ), variantOptions[0])
         : null;
     const selectedVariant = hasVariants
-        ? product.variants.find((variant) => String(variant.id) === String(selectedVariantId)) || null
+        ? variantOptions.find((variant) => String(variant.id) === String(selectedVariantId)) || null
         : null;
     const activeVariant = selectedVariant || defaultVariant;
     const displayVariant = activeVariant || defaultVariant;
 
-    const itemId = hasVariants ? (displayVariant?.id || product.variants[0].id) : product.id;
+    const itemId = displayVariant?.id || product.id;
     const isWishlisted = userWishlist.includes(itemId);
 
     const displayPrice = hasVariants
@@ -121,6 +126,17 @@ const ProductCard = ({ product, showVault = true, compact = false }) => {
     const selectionRequired = hasMultipleVariants && !selectedVariant;
     const cartItems = getCart(user?.id);
     const isInCart = !selectionRequired && cartItems.some((item) => String(item.packId) === String(itemId));
+    const cartItemMeta = {
+        name: product.name,
+        weight: displayVariant?.weight || product.weight || 'Standard',
+        price: displayPrice,
+        mrp: displayMrp,
+        image: product.image,
+        category: product.category,
+        slug: product.slug,
+        productId: product.id || product._id,
+        stock: activeStock,
+    };
 
     return (
         <motion.div
@@ -128,7 +144,7 @@ const ProductCard = ({ product, showVault = true, compact = false }) => {
             onClick={() => navigate(`/product/${product.slug || product.id}`)}
             className="group/product relative bg-white border border-accent/50 rounded-2xl md:rounded-3xl overflow-hidden flex flex-col shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer h-full"
         >
-            <div className={`relative ${compact ? 'aspect-[16/9]' : 'aspect-[4/3]'} w-full overflow-hidden bg-gradient-to-b from-background to-accent/20 flex items-center justify-center`}>
+            <div className={`relative ${compact ? 'aspect-[16/9]' : 'aspect-[5/4]'} w-full overflow-hidden bg-gradient-to-b from-background to-accent/20 flex items-center justify-center`}>
                 {product.tag && (
                     <div className="absolute top-2 left-0 z-10 md:top-3">
                         <span className="bg-secondary text-white text-[7px] md:text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 md:px-3 md:py-1 rounded-r-lg shadow-sm">
@@ -145,6 +161,26 @@ const ProductCard = ({ product, showVault = true, compact = false }) => {
                     </div>
                 )}
 
+                <div className="absolute bottom-2 left-2 right-2 z-10 md:bottom-3 md:left-3 md:right-3 flex items-center justify-between">
+                    <div className="bg-emerald-600 text-white flex items-center gap-0.5 px-1.5 py-1 rounded text-[7px] md:text-[9px] font-bold shadow-sm">
+                        <Star size={9} fill="currentColor" />
+                        <span>{product.rating}</span>
+                    </div>
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            if (!user) {
+                                navigate('/login');
+                                return;
+                            }
+                            toggleWishlist(user.id, itemId);
+                        }}
+                        className="bg-white/90 backdrop-blur-sm border border-white/70 text-gray-400 hover:text-red-500 transition-colors p-1.5 rounded-full shadow-sm active:scale-95"
+                    >
+                        <Heart size={16} fill={isWishlisted ? '#ef4444' : 'none'} className={isWishlisted ? 'text-red-500' : ''} />
+                    </button>
+                </div>
+
                 <img
                     src={product.image}
                     alt={product.name}
@@ -154,42 +190,13 @@ const ProductCard = ({ product, showVault = true, compact = false }) => {
                 />
             </div>
 
-            <div className={`${compact ? 'p-2 md:p-3' : 'p-3 md:px-4 md:pt-4'} pb-0 flex-1 flex flex-col`}>
-                <div className="flex items-center justify-between mb-1 md:mb-2">
-                    <div className="flex items-center gap-1">
-                        <img src={logo} alt="FarmLyf" className="h-2.5 md:h-3.5 w-auto object-contain" />
-                        <span className="font-brand font-bold text-[7px] md:text-[10px] uppercase tracking-wide text-primary line-clamp-1">
-                            PREMIUM
-                        </span>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                        <div className="bg-emerald-600 text-white flex items-center gap-0.5 px-1 py-0.5 rounded text-[7px] md:text-[9px] font-bold shrink-0">
-                            <Star size={9} fill="currentColor" />
-                            <span>{product.rating}</span>
-                        </div>
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                if (!user) {
-                                    navigate('/login');
-                                    return;
-                                }
-                                toggleWishlist(user.id, itemId);
-                            }}
-                            className="text-gray-300 hover:text-red-500 transition-colors p-0.5 active:scale-95"
-                        >
-                            <Heart size={16} fill={isWishlisted ? '#ef4444' : 'none'} className={isWishlisted ? 'text-red-500' : ''} />
-                        </button>
-                    </div>
-                </div>
-
-                <h3 className="text-[9px] md:text-[12px] font-bold text-textPrimary leading-tight mb-1 md:mb-2 line-clamp-2">
+            <div className={`${compact ? 'p-2 md:p-2.5' : 'p-3 md:px-4 md:pt-3'} pb-0 flex-1 flex flex-col`}>
+                <h3 className="text-[9px] md:text-[12px] font-bold text-textPrimary leading-tight mb-1 md:mb-1.5 line-clamp-2">
                     {product.name}
                 </h3>
 
                 <div className={`mt-auto ${compact ? 'space-y-0.5' : 'space-y-0.5 md:space-y-1'}`}>
-                    {hasMultipleVariants && (
+                    {hasVariants && (
                         <div
                             ref={variantMenuRef}
                             className="relative"
@@ -202,7 +209,7 @@ const ProductCard = ({ product, showVault = true, compact = false }) => {
                                 aria-haspopup="listbox"
                                 aria-expanded={isVariantMenuOpen}
                             >
-                                <span>{selectedVariant ? getVariantLabel(selectedVariant) : 'Choose an option'}</span>
+                                <span>{selectedVariant ? getVariantLabel(selectedVariant) : getVariantLabel(defaultVariant)}</span>
                                 <ChevronDown size={14} className={`transition-transform ${isVariantMenuOpen ? 'rotate-180' : ''}`} />
                             </button>
 
@@ -212,7 +219,7 @@ const ProductCard = ({ product, showVault = true, compact = false }) => {
                                     role="listbox"
                                     aria-label={`Weight options for ${product.name}`}
                                 >
-                                    {product.variants.map((variant) => {
+                                    {variantOptions.map((variant) => {
                                         const isSelected = String(variant.id) === String(selectedVariantId);
 
                                         return (
@@ -272,7 +279,8 @@ const ProductCard = ({ product, showVault = true, compact = false }) => {
                                     return;
                                 }
 
-                                addToCart(user?.id, itemId, 1);
+                                addToCart(user?.id, itemId, 1, cartItemMeta);
+                                openCartDrawer();
                             }}
                             disabled={!selectionRequired && activeStock <= 0}
                             className={`group/btn w-full py-3 md:py-3.5 rounded-t-none rounded-b-2xl md:rounded-b-3xl text-[8px] md:text-[10px] font-bold uppercase tracking-[0.18em] active:scale-[0.99] flex items-center justify-center border-t translate-y-0 md:translate-y-full group-hover/product:translate-y-0 transition-[transform,background-color] duration-300 ease-out shadow-inner ${!selectionRequired && activeStock <= 0

@@ -366,10 +366,7 @@ const ProductListPage = () => {
                                             </span>
                                         </AdminTableCell>
                                         <AdminTableCell>
-                                            <div className="flex flex-col">
-                                                <span className="text-sm text-gray-700">{typeof product.category === 'string' ? product.category : product.category?.name}</span>
-                                                <span className="text-xs text-gray-400">{product.subcategory?.name || '-'}</span>
-                                            </div>
+                                            <span className="text-sm text-gray-700">{typeof product.category === 'string' ? product.category : product.category?.name}</span>
                                         </AdminTableCell>
                                         <AdminTableCell>
                                             <span className="text-sm font-medium text-gray-900">{getPriceRange(product.variants)}</span>

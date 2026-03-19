@@ -19,6 +19,7 @@ import ReturnDetailPage from './modules/user/pages/ReturnDetailPage';
 import ReturnRequestPage from './modules/user/pages/ReturnRequestPage';
 import ProfilePage from './modules/user/pages/ProfilePage';
 import InfoPage from './modules/user/pages/InfoPage';
+import ContactUsPage from './modules/user/pages/ContactUsPage';
 import VaultPage from './modules/user/pages/VaultPage';
 import OTPPage from './modules/user/pages/OTPPage';
 import AdminLayout from './modules/admin/layout/AdminLayout';
@@ -37,13 +38,11 @@ import ReplacementDetailPage from './modules/admin/pages/ReplacementDetailPage';
 import CouponListPage from './modules/admin/pages/CouponListPage';
 import CouponFormPage from './modules/admin/pages/CouponFormPage';
 import SettingsPage from './modules/admin/pages/SettingsPage';
-import InfluencerReferralPage from './modules/admin/pages/InfluencerReferralPage';
 import LoginPage from './modules/admin/pages/LoginPage';
 import BannerListPage from './modules/admin/pages/BannerListPage';
 import ReelsPage from './modules/admin/pages/ReelsPage';
 import AdminReviewsPage from './modules/admin/pages/AdminReviewsPage';
 import AdminProfilePage from './modules/admin/pages/AdminProfilePage';
-import InfluencerDetailPage from './modules/admin/pages/InfluencerDetailPage';
 import StockAdjustmentPage from './modules/admin/pages/StockAdjustmentPage';
 import StockHistoryPage from './modules/admin/pages/StockHistoryPage';
 import LowStockAlertsPage from './modules/admin/pages/LowStockAlertsPage';
@@ -65,7 +64,9 @@ import PushNotificationPage from './modules/admin/pages/PushNotificationPage'; /
 import BlogListPage from './modules/admin/pages/BlogListPage'; // New Page 
 import BlogFormPage from './modules/admin/pages/BlogFormPage'; // New Page
 import BlogDetailPage from './modules/user/pages/BlogDetailPage'; // New Page
+import EnquiriesPage from './modules/admin/pages/EnquiriesPage';
 import ProtectedRoute from './components/ProtectedRoute'; // Auth Guard
+import { PAGES_CONFIG } from './config/pagesConfig';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 // import { Provider } from 'react-redux'; // Removed
@@ -88,6 +89,8 @@ const queryClient = new QueryClient({
 });
 
 function App() {
+  const staticPageRoutes = Object.keys(PAGES_CONFIG);
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
@@ -116,10 +119,10 @@ function App() {
                 <Route path="wishlist" element={<WishlistPage />} />
                 <Route path="vault" element={<VaultPage />} />
                 <Route path="profile/:tab?" element={<ProfilePage />} />
-                <Route path="about-us" element={<InfoPage type="about-us" />} />
-                <Route path="privacy-policy" element={<InfoPage type="privacy-policy" />} />
-                <Route path="terms-conditions" element={<InfoPage type="terms-conditions" />} />
-                <Route path="contact-us" element={<InfoPage type="contact-us" />} />
+                {staticPageRoutes.map((pageSlug) => (
+                  <Route key={pageSlug} path={pageSlug} element={<InfoPage type={pageSlug} />} />
+                ))}
+                <Route path="contact-us" element={<ContactUsPage />} />
                 <Route path="blog/:slug" element={<BlogDetailPage />} />
                 <Route path="login" element={<AuthPage />} />
                 <Route path="otp-verification" element={<OTPPage />} />
@@ -149,8 +152,6 @@ function App() {
                 <Route path="coupons" element={<CouponListPage />} />
                 <Route path="coupons/add" element={<CouponFormPage />} />
                 <Route path="coupons/edit/:id" element={<CouponFormPage />} />
-                <Route path="referrals" element={<InfluencerReferralPage />} />
-                <Route path="referrals/:id" element={<InfluencerDetailPage />} />
                 <Route path="inventory/adjust" element={<StockAdjustmentPage />} />
                 <Route path="inventory/history" element={<StockHistoryPage />} />
                 <Route path="inventory/alerts" element={<LowStockAlertsPage />} />
@@ -169,6 +170,7 @@ function App() {
                 <Route path="pages/:pageId" element={<StaticPageEditor />} />
                 <Route path="settings" element={<SettingsPage />} />
                 <Route path="notifications" element={<PushNotificationPage />} />
+                <Route path="enquiries" element={<EnquiriesPage />} />
                 <Route path="reviews" element={<AdminReviewsPage />} />
                 <Route path="reels" element={<ReelsPage />} />
                 <Route path="blogs" element={<BlogListPage />} />

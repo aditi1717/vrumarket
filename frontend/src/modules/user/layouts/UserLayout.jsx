@@ -8,6 +8,7 @@ import OfferStrip from '../components/OfferStrip';
 import Footer from '../components/Footer';
 import FloatingContact from '../components/FloatingContact';
 import BottomNavbar from '../components/BottomNavbar';
+import CartDrawer from '../components/CartDrawer';
 import { useNotifications } from '../../../hooks/useNotifications.jsx';
 
 const UserLayout = () => {
@@ -35,6 +36,7 @@ const UserLayout = () => {
             <Footer />
             <FloatingContact />
             <BottomNavbar />
+            <CartDrawer />
         </div>
     );
 };

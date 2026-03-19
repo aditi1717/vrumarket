@@ -157,6 +157,13 @@ const CatalogPage = () => {
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [selectedSubcategory, setSelectedSubcategory] = useState('all');
 
+    const toSlug = (value) => String(value || '')
+        .trim()
+        .toLowerCase()
+        .replace(/&/g, 'and')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+
     useEffect(() => {
         const searchVal = searchParams.get('search');
         if (searchVal) setSearchQuery(searchVal);
@@ -585,7 +592,7 @@ const CatalogPage = () => {
                                                     <button
                                                         key={sub}
                                                         onClick={() => {
-                                                            navigate(`/category/${sub.toLowerCase().replace(/ /g, '-')}`);
+                                                            navigate(`/category/${cat.id}/${toSlug(sub)}`);
                                                             // Keep mobile menu open or close it? Usually close it after selection.
                                                             // setIsMobileMenuOpen(false); // Let user close it manually if they want multiple filters? 
                                                             // Wait, categories usually navigate. Let's close it.

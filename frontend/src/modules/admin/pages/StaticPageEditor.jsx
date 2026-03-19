@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Save, RotateCcw, Globe, Eye, ImageIcon, Type, Upload } from 'lucide-react';
+import { ArrowLeft, Save, RotateCcw, Globe, Eye } from 'lucide-react';
 import ReactQuill, { Quill } from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 import BlotFormatter from 'quill-blot-formatter';
@@ -27,13 +27,20 @@ const StaticPageEditor = () => {
     const [title, setTitle] = useState('');
 
     useEffect(() => {
+        setContent('');
+        setTitle(pageConfig?.title || '');
+    }, [pageId, pageConfig]);
+
+    const isCurrentPageDataLoaded = !pageData || pageData.slug === pageId;
+
+    useEffect(() => {
         if (!pageConfig && !loading) {
             toast.error('Invalid Page ID');
             navigate('/admin/dashboard');
             return;
         }
 
-        if (pageData) {
+        if (pageData?.slug === pageId) {
             let initialContent = pageData.content || '';
 
             // Migrate structured data if found
@@ -99,7 +106,18 @@ const StaticPageEditor = () => {
         blotFormatter: {}
     };
 
-    if (loading || !pageConfig) return <div>Loading...</div>;
+    if (loading || !pageConfig || !isCurrentPageDataLoaded) {
+        return (
+            <div className="space-y-6 font-['Inter'] pb-32">
+                <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8">
+                    <div className="animate-pulse space-y-4">
+                        <div className="h-6 w-48 bg-gray-100 rounded-lg" />
+                        <div className="h-[560px] w-full bg-gray-50 rounded-2xl" />
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6 font-['Inter'] pb-32">
@@ -163,10 +181,15 @@ const StaticPageEditor = () => {
                 </div>
             </div>
 
+            <div className="rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-900">
+                <span className="font-bold">Website Route:</span> <code>{pageConfig.publicPath}</code>
+            </div>
+
             {/* Editor Area */}
             <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden p-1">
                 <div className="h-[600px] flex flex-col">
                     <ReactQuill
+                        key={pageId}
                         theme="snow"
                         value={content}
                         onChange={setContent}
@@ -183,9 +206,37 @@ const StaticPageEditor = () => {
                 </h4>
                 <p className="text-xs text-blue-700 leading-relaxed">
                     Make sure to use proper headings (H1, H2) within the content for better visibility on search engines.
-                    This content will be directly rendered on the website at <b>/pages/{pageId}</b>.
+                    This content will be directly rendered on the website at <b>{pageConfig.publicPath}</b>.
                 </p>
             </div>
+
+            <style>{`
+                .ql-toolbar {
+                    border-top-left-radius: 1rem !important;
+                    border-top-right-radius: 1rem !important;
+                    border-color: #e5e7eb !important;
+                    background-color: #ffffff;
+                    padding: 12px 16px !important;
+                    border-bottom: 1px solid #f3f4f6 !important;
+                }
+                .ql-container {
+                    border-bottom-left-radius: 1rem !important;
+                    border-bottom-right-radius: 1rem !important;
+                    border-color: #e5e7eb !important;
+                    background-color: #ffffff;
+                    color: #111827;
+                }
+                .ql-editor {
+                    min-height: 520px;
+                    padding: 24px;
+                    line-height: 1.8;
+                    font-size: 1rem;
+                }
+                .ql-editor.ql-blank::before {
+                    color: #9ca3af;
+                    font-style: normal;
+                }
+            `}</style>
         </div>
     );
 };

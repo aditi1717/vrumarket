@@ -1,5 +1,15 @@
 import Product from '../models/Product.js';
 
+const normalizeVariants = (variants = []) => {
+    if (!Array.isArray(variants)) return variants;
+
+    return variants.map((variant, index) => ({
+        ...variant,
+        id: variant?.id || variant?._id || `variant-${Date.now()}-${index + 1}`,
+        sku: typeof variant?.sku === 'string' ? variant.sku.trim() : '',
+    }));
+};
+
 // @desc    Fetch all products
 // @route   GET /api/products
 // @access  Public
@@ -71,6 +81,9 @@ export const deleteProduct = async (req, res) => {
 export const createProduct = async (req, res) => {
     try {
         const productData = { ...req.body };
+        if (productData.variants) {
+            productData.variants = normalizeVariants(productData.variants);
+        }
         if (productData.name && !productData.slug) {
             productData.slug = productData.name.trim().toLowerCase().replace(/[^\w ]+/g, '').replace(/ +/g, '-');
         }
@@ -98,6 +111,9 @@ export const updateProduct = async (req, res) => {
         if (product) {
             // Strip fields that shouldn't be manually updated
             const { _id, __v, createdAt, ...updateData } = req.body;
+            if (updateData.variants) {
+                updateData.variants = normalizeVariants(updateData.variants);
+            }
             
             // Auto-update slug if name changes and NO slug is provided in updateData
             if (updateData.name && !updateData.slug) {

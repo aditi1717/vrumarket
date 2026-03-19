@@ -79,7 +79,7 @@ const ProductDetailPage = () => {
     const { user, getAuthHeaders } = useAuth();
 
     // Hooks
-    const { addToCart, getCart } = useCartStore();
+    const { addToCart, getCart, openCartDrawer } = useCartStore();
     const { toggleWishlist, addToRecentlyViewed, addToSaved, getWishlist, getRecentlyViewed, saveForLater } = useUserStore();
     const { data: product, isLoading: isProductLoading, isError: isProductError } = useProduct(slug);
     const { data: allProducts = [] } = useProducts();
@@ -904,7 +904,18 @@ const ProductDetailPage = () => {
                                             toast.error(`Requested quantity exceeds available stock (${currentStock})`);
                                             return;
                                         }
-                                        addToCart(user?.id, skuId, quantity);
+                                        addToCart(user?.id, skuId, quantity, {
+                                            name: product.name,
+                                            weight: currentVariant.weight || product.weight || `${currentVariant.quantity || ''} ${currentVariant.unit || ''}`.trim(),
+                                            price: Number(currentPrice || 0),
+                                            mrp: Number(currentMrp || currentPrice || 0),
+                                            image: product.image,
+                                            category: product.category,
+                                            slug: product.slug,
+                                            productId: product.id || product._id,
+                                            stock: Number(currentStock || 0),
+                                        });
+                                        openCartDrawer();
                                     }}
                                     disabled={isOutOfStock}
                                     className={`flex-1 py-3 rounded-lg font-bold text-sm uppercase tracking-wider transition-colors shadow-sm flex items-center justify-center gap-2 
@@ -943,7 +954,17 @@ const ProductDetailPage = () => {
                                         toast.error(`Requested quantity exceeds available stock (${currentStock})`);
                                         return;
                                     }
-                                    addToCart(user?.id, skuId, quantity);
+                                    addToCart(user?.id, skuId, quantity, {
+                                        name: product.name,
+                                        weight: currentVariant.weight || product.weight || `${currentVariant.quantity || ''} ${currentVariant.unit || ''}`.trim(),
+                                        price: Number(currentPrice || 0),
+                                        mrp: Number(currentMrp || currentPrice || 0),
+                                        image: product.image,
+                                        category: product.category,
+                                        slug: product.slug,
+                                        productId: product.id || product._id,
+                                        stock: Number(currentStock || 0),
+                                    });
                                     navigate('/checkout');
                                 }}
                                 disabled={isOutOfStock}
@@ -1319,7 +1340,18 @@ const ProductDetailPage = () => {
                                 onClick={() => {
                                     if (!user) return navigate('/login');
                                     const skuId = (isGroupProduct && selectedVariant) ? selectedVariant.id : product.id;
-                                    addToCart(user.id, skuId, quantity);
+                                    addToCart(user.id, skuId, quantity, {
+                                        name: product.name,
+                                        weight: currentVariant.weight || product.weight || `${currentVariant.quantity || ''} ${currentVariant.unit || ''}`.trim(),
+                                        price: Number(currentPrice || 0),
+                                        mrp: Number(currentMrp || currentPrice || 0),
+                                        image: product.image,
+                                        category: product.category,
+                                        slug: product.slug,
+                                        productId: product.id || product._id,
+                                        stock: Number(currentStock || 0),
+                                    });
+                                    openCartDrawer();
                                 }}
                                 disabled={isOutOfStock}
                                 className={`px-6 py-2.5 rounded font-bold text-sm transition-all

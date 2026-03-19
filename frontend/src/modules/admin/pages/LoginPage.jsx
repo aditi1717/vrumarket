@@ -3,7 +3,7 @@ import { useAuth } from '../../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Lock, Mail, Eye, EyeOff, ShieldCheck, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
-import logo from '../../../assets/logo.jpeg';
+import logo from '../../../assets/logo.png';
 
 const LoginPage = () => {
     const { login } = useAuth();
