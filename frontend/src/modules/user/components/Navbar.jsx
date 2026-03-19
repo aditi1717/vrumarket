@@ -500,12 +500,18 @@ const Navbar = () => {
                 </button>
 
                 {/* Centered Logo */}
-                <Link to="/" className="flex-shrink-0 absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 flex items-center gap-1">
-                    <img src={logo} alt="FarmLyf" className="h-10 w-auto object-contain scale-110" />
+                <div className="absolute left-16 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                    <Link to="/" className="flex-shrink-0">
+                        <img src={logo} alt="FarmLyf" className="h-10 w-auto object-contain" />
+                    </Link>
+                    <div className="flex flex-col items-start leading-none text-left">
+                        <span className="font-brand font-black text-[20px] tracking-[0.02em] text-primary uppercase">VRUSHAHI</span>
+                        <span className="font-brand font-bold text-[11px] tracking-[0.34em] text-secondary uppercase">SOya products</span>
+                    </div>
                     {user?.accountType === 'Business' && (
                         <span className="bg-black text-white text-[7px] font-black px-1 py-0.5 rounded uppercase leading-none">Business</span>
                     )}
-                </Link>
+                </div>
 
                 {/* Right Icons */}
                 <div className="flex items-center gap-1">
