@@ -6,13 +6,13 @@ import { useNavigate } from 'react-router-dom';
 
 
 // Import generated images from project assets
-import cashewImg from '../../../assets/logo.webp';
-import pistaImg from '../../../assets/logo.webp';
-import walnutImg from '../../../assets/logo.webp';
-import datesImg from '../../../assets/logo.webp';
-import almondImg from '../../../assets/logo.webp';
-import anjeerImg from '../../../assets/logo.webp';
-import raisinImg from '../../../assets/logo.webp';
+import cashewImg from '../../../assets/logo.jpeg';
+import pistaImg from '../../../assets/logo.jpeg';
+import walnutImg from '../../../assets/logo.jpeg';
+import datesImg from '../../../assets/logo.jpeg';
+import almondImg from '../../../assets/logo.jpeg';
+import anjeerImg from '../../../assets/logo.jpeg';
+import raisinImg from '../../../assets/logo.jpeg';
 
 // Asset Mapping for seeded categories
 const assetMap = {

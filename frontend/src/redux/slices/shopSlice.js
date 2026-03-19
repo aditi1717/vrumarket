@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import bannerMix from '../../assets/logo.webp';
-import authShowcase from '../../assets/logo.webp';
+import bannerMix from '../../assets/logo.jpeg';
+import authShowcase from '../../assets/logo.jpeg';
 import toast from 'react-hot-toast';
 import { API_BASE_URL } from '@/lib/apiUrl';
 

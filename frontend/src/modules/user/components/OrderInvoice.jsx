@@ -3,7 +3,7 @@ import { useReactToPrint } from 'react-to-print';
 import { Printer, Download, X, FileText, Hash } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSetting } from '../../../hooks/useSettings';
-import logo from '../../../assets/logo.webp';
+import logo from '../../../assets/logo.jpeg';
 
 const OrderInvoice = ({ order, isOpen, onClose }) => {
     const componentRef = useRef(null);

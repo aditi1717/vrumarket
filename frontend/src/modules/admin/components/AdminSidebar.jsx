@@ -46,7 +46,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import { useQuery } from '@tanstack/react-query';
-import logo from '../../../assets/logo.webp';
+import logo from '../../../assets/logo.jpeg';
 
 const AdminSidebar = () => {
     const location = useLocation();

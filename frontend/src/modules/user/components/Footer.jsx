@@ -20,7 +20,7 @@ import {
     Heart,
     ThumbsUp
 } from 'lucide-react';
-import logo from '../../../assets/logo.webp';
+import logo from '../../../assets/logo.jpeg';
 
 import { useWebsiteContent } from '../../../hooks/useContent';
 

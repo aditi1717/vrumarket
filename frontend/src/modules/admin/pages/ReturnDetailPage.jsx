@@ -30,8 +30,8 @@ import {
     Download
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import baadaamImg from '../../../assets/logo.webp';
-import cashewImg from '../../../assets/logo.webp';
+import baadaamImg from '../../../assets/logo.jpeg';
+import cashewImg from '../../../assets/logo.jpeg';
 
 const API_URL = API_BASE_URL;
 

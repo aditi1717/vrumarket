@@ -5,7 +5,7 @@ import useCartStore from '../../../store/useCartStore';
 import useUserStore from '../../../store/useUserStore';
 import { useNavigate } from 'react-router-dom';
 import { Star, Heart, ChevronDown, ShoppingCart } from 'lucide-react';
-import logo from '../../../assets/logo.webp';
+import logo from '../../../assets/logo.jpeg';
 import toast from 'react-hot-toast';
 
 const calculatePer100g = (price, quantity, unit, weightStr) => {
