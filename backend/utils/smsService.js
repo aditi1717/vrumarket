@@ -2,9 +2,11 @@ import axios from 'axios';
 import Otp from '../models/Otp.js';
 import Order from '../models/Order.js';
 
-// SMS India HUB Configuration
 // SMS India HUB Configuration accessed dynamically to handle ESM loading order
 const API_TIMEOUT = 30000; // 30 seconds
+
+// Bulk SMS API Config
+const BULK_SMS_API_URL = 'https://api.bulksmsadmin.com/BulkSMSapi/keyApiSendSMS/SendSmsTemplateName';
 
 /**
  * Generate numeric OTP
@@ -76,6 +78,14 @@ function handleSmsResponse(responseData) {
  * Send SMS via SMS India HUB API
  */
 async function sendSmsViaApi(mobile, message) {
+    const provider = process.env.SMS_PROVIDER || 'SMS_INDIA_HUB';
+
+    if (provider === 'BULK_SMS') {
+        const otpMatch = message.match(/\d{4,6}/);
+        const otp = otpMatch ? otpMatch[0] : '';
+        return sendSmsViaBulkSmsApi(mobile, otp);
+    }
+
     const API_KEY = process.env.SMS_INDIA_HUB_API_KEY;
     const SENDER_ID = process.env.SMS_INDIA_HUB_SENDER_ID;
     const TEMPLATE_ID = process.env.SMS_INDIA_HUB_DLT_TEMPLATE_ID;
@@ -102,7 +112,7 @@ async function sendSmsViaApi(mobile, message) {
     }
 
     // DEBUG LOG
-    console.log('[SMS] Sending via API:', { mobile: cleanMobile, sender: SENDER_ID, url: API_URL });
+    console.log('[SMS] Sending via API (SMS India HUB):', { mobile: cleanMobile, sender: SENDER_ID, url: API_URL });
 
     const response = await axios.get(API_URL, {
         params,
@@ -117,6 +127,61 @@ async function sendSmsViaApi(mobile, message) {
     console.log('[SMS] API Response:', response.data);
 
     handleSmsResponse(response.data);
+}
+
+/**
+ * Send SMS via Bulk SMS API
+ */
+async function sendSmsViaBulkSmsApi(mobile, otp) {
+    const API_KEY = process.env.BULK_SMS_API_KEY;
+    const SENDER = process.env.BULK_SMS_SENDER;
+    const TEMPLATE_NAME = process.env.BULK_SMS_TEMPLATE_NAME;
+
+    if (!API_KEY || !SENDER || !TEMPLATE_NAME) {
+        throw new Error('Bulk SMS API credentials missing. Please check BULK_SMS_API_KEY, BULK_SMS_SENDER, and BULK_SMS_TEMPLATE_NAME.');
+    }
+
+    // Bulk SMS recommended format for mobile is often just 10 digits, or with 91. 
+    // The doc says "Mobile numbers do not require the country code (91) as a prefix" but example shows it.
+    // We'll use 10 digits to be safe, or just pass as is if it's already 10 digits.
+    const cleanMobile = mobile.replace(/\D/g, '').slice(-10);
+
+    const payload = {
+        sender: SENDER,
+        templateName: TEMPLATE_NAME,
+        smsReciever: [
+            {
+                mobileNo: cleanMobile,
+                templateParams: otp
+            }
+        ]
+    };
+
+    console.log('[SMS] Sending via Bulk SMS API:', { mobile: cleanMobile, sender: SENDER, template: TEMPLATE_NAME });
+
+    try {
+        const response = await axios.post(BULK_SMS_API_URL, payload, {
+            headers: {
+                'apikey': API_KEY,
+                'Content-Type': 'application/json'
+            },
+            timeout: API_TIMEOUT
+        });
+
+        console.log('[SMS] Bulk SMS API Response:', response.data);
+
+        if (response.data.status !== 'success') {
+            throw new Error(`Bulk SMS API Error: ${response.data.message || 'Unknown error'}`);
+        }
+
+        return response.data;
+    } catch (error) {
+        if (error.response) {
+            console.error('[SMS] Bulk SMS API Error Response:', error.response.data);
+            throw new Error(`Bulk SMS API Error (${error.response.status}): ${JSON.stringify(error.response.data)}`);
+        }
+        throw error;
+    }
 }
 
 /**
@@ -182,10 +247,17 @@ function isSpecialBypass(mobile) {
  * Check if mock mode should be used
  */
 function isMockMode() {
-    const API_KEY = process.env.SMS_INDIA_HUB_API_KEY;
-    const SENDER_ID = process.env.SMS_INDIA_HUB_SENDER_ID;
-    const useMock = process.env.USE_MOCK_OTP === 'true' || !API_KEY || !SENDER_ID;
-    console.log('[SMS] Mock mode check:', { useMock, USE_MOCK_OTP: process.env.USE_MOCK_OTP, hasKey: !!API_KEY, hasSender: !!SENDER_ID });
+    const provider = process.env.SMS_PROVIDER || 'SMS_INDIA_HUB';
+    let hasCredentials = false;
+
+    if (provider === 'BULK_SMS') {
+        hasCredentials = !!(process.env.BULK_SMS_API_KEY && process.env.BULK_SMS_SENDER && process.env.BULK_SMS_TEMPLATE_NAME);
+    } else {
+        hasCredentials = !!(process.env.SMS_INDIA_HUB_API_KEY && process.env.SMS_INDIA_HUB_SENDER_ID);
+    }
+
+    const useMock = process.env.USE_MOCK_OTP === 'true' || !hasCredentials;
+    console.log('[SMS] Mock mode check:', { useMock, provider, hasCredentials, USE_MOCK_OTP: process.env.USE_MOCK_OTP });
     return useMock;
 }
 

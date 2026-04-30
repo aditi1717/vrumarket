@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { ShoppingBag, Trash2, Plus, Minus, ArrowLeft, Percent, Tag, ChevronRight } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import toast from 'react-hot-toast';
 
@@ -55,6 +55,7 @@ import { useProducts } from '../../../hooks/useProducts';
 
 const CartPage = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const { user } = useAuth();
 
     React.useEffect(() => {
@@ -186,6 +187,8 @@ const CartPage = () => {
     }).filter(Boolean);
 
     const subtotal = enrichedCart.reduce((acc, item) => acc + (item.price || 0) * item.qty, 0);
+    const requiresLoginForCheckout = !user;
+    const showCheckoutLoginPrompt = requiresLoginForCheckout || Boolean(location.state?.checkoutLoginRequired);
 
     if (enrichedCart.length === 0) {
         return (
@@ -215,6 +218,22 @@ const CartPage = () => {
 
                 <div className="grid lg:grid-cols-3 gap-12">
                     <div className="lg:col-span-2 space-y-2 md:space-y-6">
+                        {showCheckoutLoginPrompt && (
+                            <div className="bg-amber-50 border border-amber-200 rounded-lg md:rounded-2xl px-4 py-3 md:px-5 md:py-4 flex items-start gap-3">
+                                <div className="w-8 h-8 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center shrink-0 font-black text-sm">
+                                    !
+                                </div>
+                                <div>
+                                    <h2 className="text-sm md:text-base font-black text-amber-900 uppercase tracking-tight">
+                                        Login to Continue Checkout
+                                    </h2>
+                                    <p className="text-[11px] md:text-sm text-amber-800 mt-1">
+                                        Your items are safely in the cart. Sign in when you are ready to place the order.
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
                         {enrichedCart.map((item) => (
                             <div key={item.id} className="bg-white p-2 md:p-6 rounded-lg md:rounded-2xl border border-secondary/20 flex gap-2 md:gap-6 shadow-sm group">
                                 <div
@@ -311,8 +330,13 @@ const CartPage = () => {
                                 }}
                                 className="w-full bg-secondary text-white py-2.5 md:py-4 rounded-lg md:rounded-xl font-black text-[10px] md:text-xs uppercase tracking-[0.2em] hover:bg-primary transition-all shadow-lg active:scale-95"
                             >
-                                Secure Checkout
+                                {requiresLoginForCheckout ? 'Login to Continue Checkout' : 'Secure Checkout'}
                             </button>
+                            {requiresLoginForCheckout && (
+                                <p className="text-[10px] md:text-xs text-textPrimary/55 text-center">
+                                    You can add items without logging in. Login is only required before checkout.
+                                </p>
+                            )}
                         </div>
                     </div>
                 </div>

@@ -95,6 +95,16 @@ const CheckoutPage = () => {
         ? [directBuyItem]
         : getCart(user?.id);
 
+    useEffect(() => {
+        if (!user) {
+            toast.error('Please login to continue checkout');
+            navigate('/cart', {
+                replace: true,
+                state: { checkoutLoginRequired: true }
+            });
+        }
+    }, [user, navigate]);
+
     const enrichedCart = cartItems.map(item => {
         // Try to get variant first
         const variantData = getVariantById(item.packId);
@@ -433,6 +443,10 @@ const CheckoutPage = () => {
         });
     };
     const availableCoupons = getActiveCoupons();
+
+    if (!user) {
+        return null;
+    }
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
